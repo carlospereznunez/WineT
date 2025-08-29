@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f8f7f5;
+            background-color: #FDF8F0; /* Warm Parchment Background */
         }
         h1, h2, h3, .font-serif {
             font-family: 'Playfair Display', serif;
@@ -20,19 +20,19 @@
             transition: opacity 0.3s ease;
         }
         .modal-content {
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
         .allergen-icon {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background-color: #d1d5db;
-            color: #1f2937;
-            text-align: center;
-            line-height: 30px;
-            font-weight: bold;
-            font-size: 12px;
+            background-color: #e5e7eb;
+            color: #374151;
+            font-weight: 500;
+            font-size: 11px;
             margin: 2px;
             cursor: pointer;
             position: relative;
@@ -40,7 +40,7 @@
         .allergen-tooltip {
             visibility: hidden;
             width: 140px;
-            background-color: #374151;
+            background-color: #1f2937;
             color: #fff;
             text-align: center;
             border-radius: 6px;
@@ -58,15 +58,24 @@
             visibility: visible;
             opacity: 1;
         }
+        .dish-card {
+            transition: all 0.3s ease-in-out;
+            border-top: 4px solid transparent;
+        }
+        .dish-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            border-top-color: #D97706; /* Amber-600 */
+        }
     </style>
 </head>
-<body class="bg-stone-100 text-stone-800">
+<body class="bg-[#FDF8F0] text-stone-800">
 
     <!-- Main Container -->
     <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-12">
-            <h1 class="text-5xl md:text-6xl font-bold text-stone-900">Our Menu</h1>
-            <p class="text-lg text-stone-600 mt-2">An unforgettable culinary experience</p>
+        <header class="text-center mb-16">
+            <h1 class="text-5xl md:text-7xl font-bold text-stone-900 tracking-tight">IXCHEL</h1>
+            <p class="text-lg text-amber-800 mt-2 font-serif">An unforgettable culinary experience</p>
         </header>
 
         <!-- Food Menu Section -->
@@ -379,13 +388,13 @@
         
         categories.forEach(category => {
             const categorySection = document.createElement('section');
-            categorySection.className = 'mb-12';
+            categorySection.className = 'mb-16';
             const categoryTitle = document.createElement('h2');
-            categoryTitle.className = 'text-3xl font-bold border-b-2 border-stone-300 pb-2 mb-6';
+            categoryTitle.className = 'text-4xl font-serif font-bold text-amber-800 border-b-2 border-amber-200 pb-3 mb-8';
             categoryTitle.textContent = category;
             categorySection.appendChild(categoryTitle);
             const itemsGrid = document.createElement('div');
-            itemsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-8';
+            itemsGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
             
             foodMenu.filter(item => item.category === category).forEach(item => {
                 const allergensHtml = item.allergens.map(allergenKey => {
@@ -397,16 +406,16 @@
                 }).join('');
 
                 const itemCard = document.createElement('div');
-                itemCard.className = 'bg-white p-6 rounded-lg shadow-lg flex flex-col';
+                itemCard.className = 'dish-card bg-white p-6 rounded-xl shadow-lg flex flex-col';
                 itemCard.innerHTML = `
-                    <h3 class="text-2xl font-serif font-bold mb-2">${item.name}</h3>
-                    <p class="text-stone-600 mb-4 flex-grow">${item.description}</p>
-                    <div class="mb-4">
-                        <h4 class="font-semibold text-sm mb-1">Allergens:</h4>
+                    <h3 class="text-2xl font-serif font-bold mb-3 text-stone-900">${item.name}</h3>
+                    <p class="text-stone-600 mb-5 flex-grow">${item.description}</p>
+                    <div class="mb-5">
+                        <h4 class="font-semibold text-sm mb-2 text-stone-500">Allergens:</h4>
                         <div class="flex flex-wrap">${allergensHtml || '<span class="text-stone-500 text-sm">None</span>'}</div>
                     </div>
-                    <button onclick="showPairingModal(${item.id})" class="mt-auto w-full bg-stone-800 text-white py-2 px-4 rounded-md hover:bg-stone-700 transition-colors">
-                        View Details & Pairings
+                    <button onclick="showPairingModal(${item.id})" class="mt-auto w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-700 transition-all duration-300 shadow-md hover:shadow-lg">
+                        Details & Sommelier
                     </button>
                 `;
                 itemsGrid.appendChild(itemCard);
@@ -465,44 +474,112 @@
             'd1-dr408': "This cocktail's creamy avocado base creates a luxurious texture-on-texture pairing, while the lime and corn liqueur lift the finish.",
             'd1-dr403': "The Paloma's grapefruit soda provides a zesty, slightly bitter counterpoint to the rich avocado, cleansing the palate with every sip.",
             'd2-dr101': "The Albariño's high acidity cuts through the richness of the seaweed butter and guajillo oil, while its saline notes complement the umami flavors.",
+            'd2-dr105': "The wine's zesty acidity and peppery notes cut through the richness of the bread and butter, while complementing the savory leek and salsa macha.",
+            'd2-dr106': "The full body and complex notes of fennel and apricot in this powerful white wine stand up to the umami-rich seaweed butter and the heat from the guajillo oil.",
             'd2-dr409': "The Tequila Sour's chili syrup echoes the guajillo oil's spice, while the amaretto's sweetness provides a pleasant contrast to the savory bread.",
+            'd2-dr403': "The Paloma's bright grapefruit and effervescence provide a refreshing lift, cleansing the palate from the rich focaccia and its savory toppings.",
             'd3-dr101': "The Albariño's high acidity and saline character cut cleanly through the richness of the tempura batter, while its citrus notes lift the sweet shrimp.",
             'd3-dr105': "The Grüner Veltliner's characteristic white pepper note is a fantastic match for the adobo spice, and its zesty acidity handles the fried element with ease.",
+            'd3-dr106': "This rich, full-bodied white has the texture and complexity to match the creamy avocado dressing and the spicy adobo on the shrimp without being overshadowed.",
             'd3-dr406': "The cocktail's creamy peach sweetness envelops the shrimp, while the jalapeño heat provides a thrilling contrast that matches the adobo's spice.",
+            'd3-dr403': "The zesty and slightly bitter grapefruit soda cuts through the richness of the fried tempura, offering a refreshing and clean contrast to the spicy shrimp.",
             'd4-dr107': "The Sancerre's elegant, flinty minerality provides a sophisticated backdrop for the raw tuna, while its restrained citrus notes complement without overpowering.",
+            'd4-dr108': "The Riesling's laser-like acidity and notes of lime peel are a perfect match for the raw tuna, while its subtle minerality enhances the nutty green pipián sauce.",
             'd4-dr401': "The pure agave and lime in the Tommy's Margarita act almost like a ceviche marinade for the tuna, enhancing its freshness without overpowering it.",
             'd4-dr407': "The smoky mezcal in the sour provides a beautiful contrast to the fresh tuna, while the blood orange acidity complements the green pipián.",
             'd5-dr204': "The Rosé's bright acidity cuts through the richness of the seared fillet, while its red berry notes offer a beautiful contrast to the smoky chilmole marinade.",
             'd5-dr202': "The Pinot Noir's earthy undertones and bright red fruit are a superb match for the smoky chilmole marinade and the seared beef.",
             'd5-dr206': "A truly elegant pairing. The Volnay's silky tannins, floral notes, and flinty minerality elevate the delicate beef without overpowering it.",
+            'd5-dr402': "The deep smokiness of the Mezcalita perfectly mirrors the smoky chilmole marinade on the beef, creating a powerful and synergistic pairing.",
             'd5-dr409': "The Tequila Sour's smoky chili syrup resonates with the chilmole marinade, while the amaretto's nutty sweetness provides a surprising and delicious counterpoint.",
             'd6-dr101': "The Albariño's vibrant grapefruit and lime notes perfectly mirror the citrus in the aguachile, creating a seamless and refreshing pairing.",
             'd6-dr102': "The Sauvignon Blanc's tropical fruit notes enhance the mango in the dish, while its high acidity matches the intensity of the aguachile.",
+            'd6-dr107': "The Sancerre's flinty minerality and high acidity beautifully complement the delicate raw fish, while its citrus notes harmonize with the grapefruit aguachile.",
+            'd6-dr401': "The pure, sharp lime and agave notes of a Tommy's act as an extension of the aguachile marinade, enhancing the dish's vibrant citrus profile.",
+            'd6-dr403': "The grapefruit soda in the Paloma echoes the grapefruit in the aguachile, creating a seamless, refreshing, and zesty fruit-forward pairing.",
             'd7-dr101': "The Albariño's high acidity and saline character cut through the beer batter and creamy mayonnaise, while its citrus notes lift the fresh fish.",
             'd7-dr105': "Grüner's peppery spice is a great match for the scotch bonnet mayo, while its acidity cleanses the palate from the fried fish.",
+            'd7-dr106': "The wine's full body and rich texture can stand up to the fried batter and spicy mayonnaise, while its stone fruit notes complement the fish.",
             'd7-dr403': "A Paloma is a quintessential taco companion. Its effervescence and grapefruit zest are incredibly refreshing against the fried fish and spicy mayo.",
             'd7-dr401': "The classic choice. The sharp lime cuts through the richness, while the tequila complements the flavors of the corn tortilla.",
+            'd8-dr204': "The rosé's bright strawberry notes provide a fruity lift to the earthy beetroot, while its crisp acidity balances the creamy labneh.",
+            'd8-dr102': "The wine's herbal, grassy notes are a fantastic complement to the earthy beetroot, creating a pairing that is vibrant and fresh.",
             'd8-dr208': "The Cabernet Franc's subtle pyrazine (bell pepper) and herbal notes are a fantastic complement to the earthy beetroot, creating a savory, garden-fresh pairing.",
+            'd8-dr403': "The zesty grapefruit of the Paloma cuts through the earthy beetroot and rich labneh, adding a bright and refreshing citrus dimension.",
+            'd8-dr402': "The smokiness of the mezcal provides a stunning contrast to the sweet, earthy beetroot and complements the smoked almonds in the dish.",
+            'd9-dr101': "The saline notes and high acidity of the Albariño cut through the rich cheese and complement the prawns, while cleansing the palate from the adobo spice.",
+            'd9-dr105': "Grüner Veltliner's peppery spice enhances the smoky morita chili mayo, and its acidity provides a refreshing counterpoint to the cheesy filling.",
+            'd9-dr106': "The Châteauneuf-du-Pape Blanc's full body and stone fruit notes can handle the richness of the quesadilla, with its complexity matching the smoky adobo.",
             'd9-dr406': "The Spicy White Peach Margarita's heat and fruitiness are a bold match for the prawn adobo, with its creamy texture complementing the melted cheese.",
+            'd9-dr407': "The smoky mezcal and zesty blood orange in the sour cut through the richness of the cheese, while complementing the smoky adobo of the prawns.",
             'd10-dr209': "The Barbera's high acidity cuts through the richness of the cheese and short rib, while its sour cherry notes provide a lovely contrast to the smoky molcajete sauce.",
+            'd10-dr201': "The vanilla and spice notes from the Rioja's oak aging are a perfect match for the slow-braised short rib and smoky sauces.",
+            'd10-dr208': "The wine's savory, herbal notes provide a beautiful contrast to the sweet pineapple salsa, while its tannins cut through the rich beef and cheese.",
+            'd10-dr402': "The smoky Mezcalita enhances the flavor of the molcajete sauce and the rich short rib, a classic pairing for savory Mexican dishes.",
+            'd10-dr404': "The Negroni's characteristic bitterness provides a sophisticated counterpoint to the rich, cheesy short rib, cleansing the palate.",
             'd11-dr103': "An unconventional but brilliant pairing. The Gewurztraminer's notes of lychee and rose petal offer a stunning aromatic contrast to the savory adobo spice, while its off-dry character embraces the sweet pineapple.",
+            'd11-dr202': "The Pinot Noir's bright red fruit and acidity cut through the richness of the pork, while its earthy notes complement the adobo spices.",
+            'd11-dr206': "The elegant red fruit and floral notes of the Volnay provide a refined contrast to the bold flavors of the pork al pastor, elevating the dish.",
+            'd11-dr402': "The smokiness of the mezcal is a natural partner for the spiced adobo pork and the char from the grill.",
+            'd11-dr407': "The sour's smoky base and bright blood orange acidity are a perfect foil for the rich, spicy, and sweet notes of the pork al pastor.",
+            'd12-dr104': "The Vermentino's clean, floral notes and hint of salinity are a delicate match for the grilled fish, allowing the nutty pistachio pipián to shine.",
             'd12-dr107': "The Sancerre's flinty minerality and restrained citrus notes provide an elegant framework that enhances the delicate flavor of the grilled bass without overwhelming the nutty pipián.",
+            'd12-dr106': "The wine's full body, rich texture, and complex notes of fennel and apricot can stand up to the rich pistachio pipián and enhance the grilled fish.",
+            'd12-dr401': "The pure, clean flavors of a Tommy's Margarita, with its sharp lime, act as a final squeeze of citrus over the grilled fish.",
+            'd12-dr403': "The Paloma's refreshing grapefruit and effervescence cut through the richness of the pistachio pipián, cleansing the palate.",
             'd13-dr201': "The Rioja's savory leather and spice notes from oak aging are a classic match for the braised short rib, complementing the smoky barbecue sauce.",
             'd13-dr205': "The Primitivo's bold, jammy dark fruit and spice notes are a powerful match for the rich, glazed short rib, standing up to its intense flavor profile.",
             'd13-dr207': "An ultimate pairing for a rich dish. The Château Talbot's structured tannins and notes of blackcurrant and tobacco can stand shoulder-to-shoulder with the powerful short rib.",
+            'd13-dr402': "The deep smoke of the mezcal is a perfect match for the smoky barbecue sauce and the rich, slow-cooked beef.",
             'd13-dr404': "The bitterness of our Ixchel Negroni cuts through the fat of the rib, while the aged tequila provides an earthy foundation that complements the smoky barbecue sauce.",
+            'd14-dr201': "The Rioja's earthy and spicy notes are a traditional and excellent pairing for lamb, harmonizing with the rich reduction sauce.",
             'd14-dr208': "The Cabernet Franc's herbal and savory notes are a perfect match for the rich lamb, while its structured tannins stand up to the reduction sauce.",
+            'd14-dr207': "The powerful structure and savory notes of tobacco and cedar in the Château Talbot are a magnificent partner for the robust braised lamb.",
+            'd14-dr402': "The mezcal's smokiness complements the deep flavors of the braised lamb and the spicy 'salsa borracha'.",
+            'd14-dr409': "The Tequila Sour's smoky chili notes echo the spice in the salsas, while its body stands up to the richness of the lamb.",
             'd15-dr103': "The Gewurztraminer's aromatic profile of rose and ginger is a bold and successful pairing for the spicy salsa macha, while its texture matches the richness of the dish.",
+            'd15-dr105': "The Grüner Veltliner's peppery spice resonates with the salsa macha, and its acidity cuts through the creamy morita mayonnaise.",
+            'd15-dr106': "This white wine's full body and complexity allow it to stand up to the bold, spicy, and nutty flavors of the roasted cauliflower dish.",
+            'd15-dr406': "The cocktail's creamy texture and sweet peach notes provide a cooling contrast to the spicy salsa macha, while the jalapeño heat complements it.",
+            'd15-dr402': "The smokiness of the Mezcalita is a natural pairing for the roasted notes of the cauliflower and the nutty, spicy salsa macha.",
             'd16-dr301': "This Late Harvest wine has notes of honey and candied pineapple that harmonize with the cake's sweetness, while its high acidity prevents the pairing from being overly cloying.",
             'd16-dr405': "A perfect match. The creamy, cinnamon notes of the Horchata cocktail mirror the flavors in the cake's custard, creating a seamless and decadent dessert experience.",
             'd17-dr301': "The wine's tropical fruit notes of pineapple and apricot jam enhance the fresh mango, while its sweetness is balanced by the tangy chamoy and lime sorbet.",
             'd17-dr401': "The Tommy's Margarita's sharp lime and clean agave flavor profile provides a fantastic citrusy counterpoint to the sweet mango and spicy Tajín.",
             'd20-dr209': "The Barbera's high acidity is perfect for cutting through the richness of the pork rib, while its sour cherry notes contrast the sweet chili glaze.",
+            'd20-dr205': "The jammy dark fruit of the Primitivo is a great match for the sweet and sticky chili glaze, creating a rich, fruit-forward pairing.",
+            'd20-dr208': "The savory and herbal notes of the Cabernet Franc offer a sophisticated contrast to the sweetness of the chili glaze, balancing the dish.",
+            'd20-dr402': "The smokiness of the Mezcalita is a natural partner to the grilled pork, while its citrus notes cut through the richness of the chili glaze.",
+            'd20-dr404': "The Negroni's bitterness is an excellent counterpoint to the sweet chili glaze on the pork, creating a complex and balanced pairing.",
+            'd21-dr104': "The crisp Vermentino is refreshing against the grilled chicken, while its floral notes complement the adobo spices without overwhelming them.",
+            'd21-dr202': "Pinot Noir is a versatile pairing for chicken. Its bright acidity and red fruit notes complement the adobo spice without being too heavy.",
             'd21-dr106': "A powerful white for a powerful bird. The Châteauneuf-du-Pape Blanc's rich texture and notes of stone fruit and fennel complement the adobo-marinated chicken beautifully.",
+            'd21-dr403': "The Paloma’s refreshing grapefruit soda cuts through the richness of the chicken glaze and cools the palate from the adobo spice.",
+            'd21-dr409': "The sour's smoky chili syrup echoes the adobo marinade, creating a harmonious spicy pairing, while the amaretto adds a sweet complexity.",
+            'd22-dr201': "A classic steak pairing. The Rioja's vanilla and spice from oak aging complement the grilled meat, and its tannins match the protein.",
+            'd22-dr205': "The bold fruit and soft tannins of the Primitivo are a great match for the rich T-bone, especially the char from the grill.",
             'd22-dr207': "A classic pairing. The bold structure, firm tannins, and blackcurrant notes of the Château Talbot are the perfect match for a high-quality T-bone steak.",
+            'd22-dr402': "The deep smoke of the mezcal enhances the char-grilled flavor of the T-Bone, a classic pairing for grilled meats.",
+            'd22-dr404': "The Negroni’s bitter profile provides a sophisticated contrast to the rich, fatty steak, while the herbal notes from the vermouth complement the cilantro marinade.",
+            'd23-dr101': "The Albariño's high acidity and crispness are perfect for cutting through the fried potatoes and the creamy, smoky mayonnaise.",
+            'd23-dr105': "The peppery spice of the Grüner Veltliner is a great match for the morita mayonnaise, and its zesty acidity is refreshing against the fried potatoes.",
+            'd23-dr403': "The effervescent Paloma is the perfect palate cleanser for the crispy potatoes and rich morita mayonnaise.",
+            'd23-dr401': "The sharp, clean lime of the Tommy's Margarita cuts beautifully through the fried potatoes and creamy mayonnaise.",
+            'd24-dr104': "The wine's bright acidity matches the preserved lemon vinaigrette, while its floral notes complement the sweet pear and bitter greens.",
+            'd24-dr102': "The Sauvignon Blanc's herbal notes harmonize with the salad greens, while its acidity stands up to the vinaigrette.",
+            'd24-dr107': "The Sancerre's elegant minerality and citrus notes are a sophisticated match for this complex salad, especially the preserved lemon vinaigrette.",
+            'd24-dr403': "The Paloma's grapefruit notes complement the preserved lemon vinaigrette and sweet pear in the salad.",
+            'd24-dr401': "The Margarita's bright lime acidity harmonizes perfectly with the salad's vinaigrette, creating a light and zesty pairing.",
+            'd25-dr209': "The Barbera's high acidity is essential for cutting through the molten cheese, while its sour cherry notes contrast with the savory chorizo.",
+            'd25-dr201': "The Rioja's savory spice notes are a perfect match for the roasted chorizo, and its structure handles the rich cheese.",
+            'd25-dr205': "The bold fruit of the Primitivo stands up to the intense flavors of the chorizo and rich cheese blend.",
+            'd25-dr402': "The smoky Mezcalita cuts through the rich, molten cheese and beautifully complements the savory roasted chorizo.",
+            'd25-dr404': "The Negroni's bitterness offers a welcome contrast to the intense richness of the queso fundido, cleansing the palate.",
             'd26-dr104': "The Vermentino's crisp, saline character is a perfect match for the fresh tomatoes, while its acidity balances the creamy ricotta.",
             'd26-dr107': "The Sancerre's minerality and high acidity cut through the richness of the olive oil and cheese, elevating the fresh tomato flavor.",
-            'd26-dr401': "The clean, sharp lime of the Tommy's Margarita acts like a final squeeze of citrus over the salad, brightening all the flavors."
+            'd26-dr108': "The Riesling's high acidity is a perfect foil for the tomatoes' acidity and the creamy ricotta, creating a vibrant and clean pairing.",
+            'd26-dr401': "The clean, sharp lime of the Tommy's Margarita acts like a final squeeze of citrus over the salad, brightening all the flavors.",
+            'd26-dr403': "The refreshing effervescence and citrus notes of the Paloma provide a lively contrast to the creamy ricotta and the sweetness of the tomatoes."
         };
         return reasons[`d${dish.id}-dr${drink.id}`];
     }
@@ -521,21 +598,21 @@
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
-                        <h3 class="text-xl font-bold mb-2 border-b pb-1">Dish Description</h3>
+                        <h3 class="text-xl font-bold mb-2 border-b border-amber-200 pb-2 text-amber-800">Dish Description</h3>
                         <p class="text-stone-600 mb-4">${dish.description}</p>
-                        <h3 class="text-xl font-bold mb-2 border-b pb-1">Main Ingredients</h3>
+                        <h3 class="text-xl font-bold mb-2 border-b border-amber-200 pb-2 text-amber-800">Main Ingredients</h3>
                         <p class="text-stone-600 mb-4">${dish.ingredients.join(', ')}.</p>
-                        <h3 class="text-xl font-bold mb-2 border-b pb-1">History & Origin</h3>
+                        <h3 class="text-xl font-bold mb-2 border-b border-amber-200 pb-2 text-amber-800">History & Origin</h3>
                         <p class="text-stone-600 mb-4">${dish.history}</p>
                     </div>
-                    <div class="bg-stone-50 p-4 rounded-lg">
-                        <h3 class="text-2xl font-serif font-bold mb-4 text-center">Pairing Suggestions</h3>
+                    <div class="bg-amber-50/50 p-4 rounded-lg">
+                        <h3 class="text-2xl font-serif font-bold mb-4 text-center text-amber-900">Sommelier's Suggestions</h3>
                         <div class="mb-6">
-                            <h4 class="text-lg font-semibold mb-2">Recommended Wines</h4>
+                            <h4 class="text-lg font-semibold mb-3 text-stone-800">Recommended Wines</h4>
                             ${generateWinePairingHtml(pairings.wines, dish)}
                         </div>
                         <div>
-                            <h4 class="text-lg font-semibold mb-2">Suggested Cocktails</h4>
+                            <h4 class="text-lg font-semibold mb-3 text-stone-800">Suggested Cocktails</h4>
                             ${generateCocktailPairingHtml(pairings.cocktails, dish)}
                         </div>
                     </div>
@@ -546,11 +623,11 @@
         modalContent.innerHTML = pairingsHtml;
         document.body.style.overflow = 'hidden';
         pairingModal.classList.remove('opacity-0', 'pointer-events-none');
-        modalContent.classList.remove('scale-95');
+        modalContent.classList.remove('scale-95', 'opacity-0');
     }
 
     function generateWinePairingHtml(wines, dish) {
-        let html = '<ul class="space-y-3">';
+        let html = '<ul class="space-y-4">';
         const priceCategories = ['byGlass', 'midRange', 'premium'];
         const categoryLabels = { byGlass: 'Bottle', midRange: 'Bottle', premium: 'Premium Bottle' };
 
@@ -558,11 +635,15 @@
             const wine = wines[category];
             if (wine) {
                 const reason = getPairingReason(wine, dish);
-                html += `<li><a href="#" onclick="showDrinkDetails(${wine.id}, 'wine')" class="block p-3 bg-white rounded shadow hover:shadow-md transition-shadow"><strong>${categoryLabels[category]} (£${wine.price}):</strong> ${wine.name}<br><small class="text-stone-500">${reason}</small></a></li>`;
+                html += `<li><a href="#" onclick="showDrinkDetails(${wine.id}, 'wine')" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:border-amber-500 border-2 border-transparent transition-all duration-300">
+                    <span class="font-bold text-stone-800">${wine.name}</span><br>
+                    <span class="text-sm font-semibold text-amber-700">£${wine.price} - ${categoryLabels[category]}</span><br>
+                    <small class="text-stone-500 mt-1 block">${reason}</small>
+                </a></li>`;
             } else if (dish.pairingTags.includes('dessert')) {
                 // Do not show message for dessert mid/premium
             } else {
-                 html += `<li><p class="text-stone-500 p-3 text-sm">No specific recommendation in this price range. Please ask your server for guidance.</p></li>`;
+                 html += `<li><div class="text-stone-500 p-3 text-sm bg-gray-100 rounded-lg">No specific recommendation in this price range. Please ask your server for guidance.</div></li>`;
             }
         });
 
@@ -572,11 +653,15 @@
 
     function generateCocktailPairingHtml(cocktails, dish) {
         if (!cocktails || cocktails.length === 0) return '<p class="text-stone-500">No cocktail suggestions for this dish.</p>';
-        let html = '<ul class="space-y-3">';
+        let html = '<ul class="space-y-4">';
         cocktails.forEach(cocktail => {
             if (cocktail) {
                 const reason = getPairingReason(cocktail, dish);
-                html += `<li><a href="#" onclick="showDrinkDetails(${cocktail.id}, 'cocktail')" class="block p-3 bg-white rounded shadow hover:shadow-md transition-shadow"><strong>${cocktail.name} (£${cocktail.price})</strong><br><small class="text-stone-500">${reason}</small></a></li>`;
+                html += `<li><a href="#" onclick="showDrinkDetails(${cocktail.id}, 'cocktail')" class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:border-amber-500 border-2 border-transparent transition-all duration-300">
+                    <span class="font-bold text-stone-800">${cocktail.name}</span><br>
+                    <span class="text-sm font-semibold text-amber-700">£${cocktail.price}</span><br>
+                    <small class="text-stone-500 mt-1 block">${reason}</small>
+                </a></li>`;
             }
         });
         html += '</ul>';
@@ -595,36 +680,36 @@
                 <div class="p-6 md:p-8">
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <h2 class="text-3xl font-serif font-bold">${drink.name}</h2>
-                            <p class="text-stone-500">${drink.grape || 'Blend'} - ${drink.region}</p>
+                            <h2 class="text-3xl font-serif font-bold text-stone-900">${drink.name}</h2>
+                            <p class="text-stone-500">${drink.type} Wine</p>
                         </div>
                         <button onclick="closeModal()" class="text-3xl text-stone-500 hover:text-stone-800">&times;</button>
                     </div>
                     <div class="space-y-4 text-stone-700">
-                        <div><h4 class="font-bold text-lg text-stone-800">Appearance</h4><p>${notes.appearance}</p></div>
-                        <div><h4 class="font-bold text-lg text-stone-800">Nose</h4><p>${notes.nose}</p></div>
-                        <div><h4 class="font-bold text-lg text-stone-800">Palate</h4><p>${notes.palate}</p></div>
-                        <div class="bg-stone-100 p-4 rounded-lg">
-                            <h4 class="font-bold text-lg text-stone-800">Sommelier's Summary</h4>
+                        <div><h4 class="font-bold text-lg text-amber-800">Appearance</h4><p>${notes.appearance}</p></div>
+                        <div><h4 class="font-bold text-lg text-amber-800">Nose</h4><p>${notes.nose}</p></div>
+                        <div><h4 class="font-bold text-lg text-amber-800">Palate</h4><p>${notes.palate}</p></div>
+                        <div class="bg-amber-50/50 p-4 rounded-lg mt-6">
+                            <h4 class="font-bold text-lg text-amber-900">Sommelier's Summary</h4>
                             <p class="mt-1">${notes.summary}</p>
                         </div>
                     </div>
-                    <button onclick="goBackToPairings()" class="mt-8 text-stone-800 font-semibold">← Back to Pairings</button>
+                    <button onclick="goBackToPairings()" class="mt-8 text-amber-700 font-semibold hover:text-amber-800 transition-colors">← Back to Pairings</button>
                 </div>
             `;
         } else { // Cocktail
             detailsHtml = `
                 <div class="p-6 md:p-8">
                     <div class="flex justify-between items-start">
-                        <h2 class="text-3xl font-serif font-bold">${drink.name} (£${drink.price})</h2>
+                        <h2 class="text-3xl font-serif font-bold text-stone-900">${drink.name} (£${drink.price})</h2>
                         <button onclick="closeModal()" class="text-3xl text-stone-500 hover:text-stone-800">&times;</button>
                     </div>
-                    <div class="mt-6 space-y-4">
-                        <div><h4 class="font-bold">Tasting Notes:</h4><p class="text-stone-600">${drink.tastingNotes || 'Not available'}</p></div>
-                        <div><h4 class="font-bold">Ingredients:</h4><p class="text-stone-600">${drink.ingredients.join(', ')}</p></div>
-                        <div><h4 class="font-bold">History:</h4><p class="text-stone-600">${drink.history || 'Not available'}</p></div>
+                    <div class="mt-6 space-y-4 text-stone-700">
+                        <div><h4 class="font-bold text-lg text-amber-800">Tasting Notes:</h4><p>${drink.tastingNotes || 'Not available'}</p></div>
+                        <div><h4 class="font-bold text-lg text-amber-800">Ingredients:</h4><p>${drink.ingredients.join(', ')}</p></div>
+                        <div><h4 class="font-bold text-lg text-amber-800">History:</h4><p>${drink.history || 'Not available'}</p></div>
                     </div>
-                    <button onclick="goBackToPairings()" class="mt-6 text-stone-800 font-semibold">← Back to Pairings</button>
+                    <button onclick="goBackToPairings()" class="mt-8 text-amber-700 font-semibold hover:text-amber-800 transition-colors">← Back to Pairings</button>
                 </div>
             `;
         }
@@ -643,7 +728,7 @@
     window.closeModal = function() {
         document.body.style.overflow = 'auto';
         pairingModal.classList.add('opacity-0', 'pointer-events-none');
-        modalContent.classList.add('scale-95');
+        modalContent.classList.add('scale-95', 'opacity-0');
         window.previousModalState = null;
     }
 
