@@ -3,1914 +3,658 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IXCHEL Wine Pairing</title>
+    <title>Interactive Menu with Virtual Sommelier</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
-        
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #1a1a1a;
-            color: #e2e8f0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f7f5;
         }
-        
-        .header-font {
+        h1, h2, h3, .font-serif {
             font-family: 'Playfair Display', serif;
         }
-        
-        .wine-characteristic {
-            height: 100%;
-            transition: all 0.3s ease;
-        }
-        
-        .modal {
+        .modal-overlay {
             transition: opacity 0.3s ease;
         }
-        
-        .fade-in {
-            animation: fadeIn 0.3s;
+        .modal-content {
+            transition: transform 0.3s ease;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .allergen-icon {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #d1d5db;
+            color: #1f2937;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            font-size: 12px;
+            margin: 2px;
+            cursor: pointer;
+            position: relative;
         }
-        
-        .menu-category {
-            scroll-margin-top: 20px;
+        .allergen-tooltip {
+            visibility: hidden;
+            width: 140px;
+            background-color: #374151;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 130%;
+            left: 50%;
+            margin-left: -70px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
         }
-        
-        .allergens {
-            font-size: 0.75rem;
-            color: #d4a017;
-        }
-        
-        .menu-item {
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
-        
-        .menu-item:hover {
-            border-left-color: #d4a017;
-            background-color: rgba(212, 160, 23, 0.05);
-        }
-        
-        .gold-gradient {
-            background: linear-gradient(135deg, #d4a017 0%, #f6e05e 100%);
-        }
-        
-        .gold-border {
-            border-color: #d4a017;
-        }
-        
-        .wine-card {
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid rgba(212, 160, 23, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .wine-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(212, 160, 23, 0.2);
-            border-color: #d4a017;
-        }
-
-        .dish-description-modal {
-            max-height: 80vh;
-            overflow-y: auto;
+        .allergen-icon:hover .allergen-tooltip {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
-<body class="min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Header -->
+<body class="bg-stone-100 text-stone-800">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-12">
-            <h1 class="text-5xl font-bold text-amber-400 mb-2 header-font">IXCHEL</h1>
-            <h2 class="text-2xl text-amber-300 header-font">Mexican Fine Dining Wine Pairing</h2>
-            <div class="w-24 h-1 gold-gradient mx-auto mt-4"></div>
-            <div class="text-sm text-amber-300 mt-4">
-                Allergen Key: (v) - vegetarian, (ve) - vegan, (gf) - gluten free, (d) - dairy, (n) - nuts
-            </div>
+            <h1 class="text-5xl md:text-6xl font-bold text-stone-900">Our Menu</h1>
+            <p class="text-lg text-stone-600 mt-2">An unforgettable culinary experience</p>
         </header>
 
-        <!-- Main Navigation -->
-        <div class="flex flex-wrap justify-center gap-4 mb-12">
-            <button onclick="showMenu('lunch')" class="gold-gradient hover:opacity-90 text-gray-900 px-8 py-4 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg">
-                Lunch Menu
-            </button>
-            <button onclick="showMenu('dinner')" class="gold-gradient hover:opacity-90 text-gray-900 px-8 py-4 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg">
-                Dinner Menu
-            </button>
-            <button onclick="showMenu('sunday')" class="gold-gradient hover:opacity-90 text-gray-900 px-8 py-4 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg">
-                Sunday Lunch
-            </button>
-        </div>
-
-        <!-- Menu Display -->
-        <div id="menuDisplay" class="hidden bg-gray-800 rounded-lg shadow-xl p-8 mb-12 fade-in border gold-border">
-            <div class="flex justify-between items-center mb-8">
-                <h3 id="menuTitle" class="text-3xl font-bold text-amber-400 header-font"></h3>
-                <button onclick="hideMenu()" class="text-amber-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div id="menuContent" class="space-y-12"></div>
-        </div>
-
-        <!-- Dish Display with Wine Pairing -->
-        <div id="dishDisplay" class="hidden bg-gray-800 rounded-lg shadow-xl p-8 mb-12 fade-in border gold-border">
-            <div class="flex justify-between items-start mb-8">
-                <div>
-                    <h3 id="dishTitle" class="text-3xl font-bold text-amber-400 header-font"></h3>
-                    <div id="dishAllergens" class="allergens mt-2"></div>
-                    <div id="pairingExplanation" class="text-amber-200 mt-4 italic"></div>
-                </div>
-                <button onclick="hideDish()" class="text-amber-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- By the Glass -->
-                <div class="bg-gray-900 p-6 rounded-lg border gold-border">
-                    <h4 class="font-semibold text-xl text-amber-400 mb-4 border-b border-amber-400 pb-2 header-font">By the Glass</h4>
-                    <p class="text-sm text-gray-400 mb-4">Perfect pairing for this dish</p>
-                    <div id="glassWines" class="space-y-6"></div>
-                </div>
-
-                <!-- Mid-Range -->
-                <div class="bg-gray-900 p-6 rounded-lg border gold-border">
-                    <h4 class="font-semibold text-xl text-amber-400 mb-4 border-b border-amber-400 pb-2 header-font">Mid-Range Bottles</h4>
-                    <p class="text-sm text-gray-400 mb-4">Excellent quality-price ratio</p>
-                    <div id="midWines" class="space-y-6"></div>
-                </div>
-
-                <!-- Premium -->
-                <div class="bg-gray-900 p-6 rounded-lg border gold-border">
-                    <h4 class="font-semibold text-xl text-amber-400 mb-4 border-b border-amber-400 pb-2 header-font">Premium Bottles</h4>
-                    <p class="text-sm text-gray-400 mb-4">Exceptional pairing experience</p>
-                    <div id="premiumWines" class="space-y-6"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Wine Database -->
-        <script>
-            const wineDatabase = {
-                // White Wines
-                sauvignon_blanc: {
-                    name: "Sauvignon Blanc, Lapostolle",
-                    producer: "Casa Lapostolle",
-                    region: "Casablanca Valley, Chile",
-                    type: "white",
-                    abv: "13.5%",
-                    glassPrice: "8.5",
-                    bottlePrice: "34",
-                    tastingNotes: "Crisp acidity with notes of grapefruit, green apple, and fresh herbs.",
-                    detailedDescription: "This exceptional Sauvignon Blanc from Chile's cool Casablanca Valley is produced by the renowned Lapostolle family (of Grand Marnier fame). The vineyard's proximity to the Pacific Ocean creates ideal conditions for this varietal, with morning fogs and afternoon breezes preserving the grapes' natural acidity. The 2022 vintage shows particularly vibrant citrus notes with a distinctive minerality that speaks to the region's granitic soils. Aged briefly on lees to add texture without oak influence.",
-                    pairing: "Excellent with fresh vegetables, light appetizers, and dishes with citrus elements.",
-                    criticQuote: "\"A benchmark for New World Sauvignon Blanc - vibrant yet sophisticated.\" - James Suckling, 92 pts",
-                    characteristics: {
-                        color: 2,
-                        tannins: 1,
-                        sugar: 1,
-                        acidity: 4,
-                        body: 2,
-                        persistence: 3
-                    }
-                },
-                verdejo: {
-                    name: "Verdejo, Naia",
-                    producer: "Bodegas Naia",
-                    region: "Rueda, Spain",
-                    type: "white",
-                    abv: "13%",
-                    glassPrice: "9",
-                    bottlePrice: "36",
-                    tastingNotes: "Fresh herbal notes with flavors of pear, fennel, and citrus zest.",
-                    detailedDescription: "Naia Verdejo comes from old vines (some over 100 years) in the Rueda region, where the Verdejo grape has been cultivated since the 11th century. The 2021 vintage was hand-harvested at night to preserve freshness, then fermented in stainless steel with native yeasts. What makes this wine special is its combination of Rueda's traditional oxidative style (brief skin contact) with modern reductive techniques, creating a wine with both depth and vibrancy. The finish shows a characteristic bitter almond note that is the signature of great Verdejo.",
-                    pairing: "Perfect with guacamole, ceviche, and light seafood dishes.",
-                    criticQuote: "\"The Naia Verdejo consistently delivers exceptional quality - the 2021 might be their best yet.\" - Wine Enthusiast, 93 pts",
-                    characteristics: {
-                        color: 2,
-                        tannins: 1,
-                        sugar: 1,
-                        acidity: 4,
-                        body: 3,
-                        persistence: 3
-                    }
-                },
-                gruner_veltliner: {
-                    name: "Grüner Veltliner, Domäne Wachau",
-                    producer: "Domäne Wachau",
-                    region: "Wachau, Austria",
-                    type: "white",
-                    abv: "12.5%",
-                    glassPrice: "10",
-                    bottlePrice: "42",
-                    tastingNotes: "White pepper, green bean, and citrus with a crisp, dry finish.",
-                    detailedDescription: "From the steep terraced vineyards of the Wachau, this Grüner Veltliner exemplifies why Austria's flagship white grape has gained international acclaim. The 2020 vintage shows exceptional balance between ripeness and freshness, with the cool Danube winds helping maintain acidity. Fermented in stainless steel to preserve purity, it shows the classic 'peppery' character that makes this variety so distinctive. The wine's texture comes from extended lees contact, giving it a mouthfeel that belies its modest alcohol.",
-                    pairing: "Pairs well with spicy dishes and vegetables like avocado.",
-                    criticQuote: "\"A textbook example of Grüner Veltliner - precise, mineral-driven, and endlessly food-friendly.\" - Wine Spectator, 91 pts",
-                    characteristics: {
-                        color: 2,
-                        tannins: 1,
-                        sugar: 1,
-                        acidity: 4,
-                        body: 3,
-                        persistence: 3
-                    }
-                },
-                chardonnay: {
-                    name: "Chardonnay, Louis Jadot",
-                    producer: "Louis Jadot",
-                    region: "Burgundy, France",
-                    type: "white",
-                    abv: "13%",
-                    glassPrice: "12",
-                    bottlePrice: "48",
-                    tastingNotes: "Buttery texture with flavors of apple, pear, and subtle oak.",
-                    detailedDescription: "This classic white Burgundy from the venerable Louis Jadot house showcases Chardonnay in its most elegant form. Sourced from vineyards in the Mâconnais region, the 2019 vintage benefited from an exceptional growing season. Partial malolactic fermentation and aging in French oak (20% new) provide just enough roundness without overpowering the wine's mineral core. The finish shows impressive length with a touch of hazelnut that develops with air.",
-                    pairing: "Complements creamy sauces and rich fish dishes.",
-                    criticQuote: "\"Jadot continues to set the standard for affordable Burgundy that overdelivers.\" - Robert Parker's Wine Advocate, 90 pts",
-                    characteristics: {
-                        color: 3,
-                        tannins: 1,
-                        sugar: 2,
-                        acidity: 3,
-                        body: 4,
-                        persistence: 4
-                    }
-                },
-
-                // Rosé Wines
-                provence_rose: {
-                    name: "Rosé, Château d'Esclans",
-                    producer: "Château d'Esclans",
-                    region: "Provence, France",
-                    type: "rosé",
-                    abv: "13%",
-                    glassPrice: "9",
-                    bottlePrice: "36",
-                    tastingNotes: "Delicate strawberry, citrus, and floral notes with a dry finish.",
-                    detailedDescription: "From the estate that revolutionized premium rosé, this wine comes from 60-year-old Grenache vines in the heart of Provence. The 2021 vintage was harvested at night to preserve freshness, with gentle pressing and cool fermentation in stainless steel. What sets this apart is the partial (15%) aging in large oak foudres, adding subtle texture without oak flavor. The pale salmon color is classic Provence, while the nose offers an alluring mix of white peach, wild strawberry, and crushed limestone.",
-                    pairing: "Versatile with appetizers, salads, and light seafood.",
-                    criticQuote: "\"Proof that rosé can be serious wine - complex yet refreshing.\" - Jancis Robinson, 17/20",
-                    characteristics: {
-                        color: 1,
-                        tannins: 1,
-                        sugar: 1,
-                        acidity: 3,
-                        body: 2,
-                        persistence: 3
-                    }
-                },
-                tempranillo_rose: {
-                    name: "Rosé of Tempranillo, Marqués de Cáceres",
-                    producer: "Marqués de Cáceres",
-                    region: "Rioja, Spain",
-                    type: "rosé",
-                    abv: "12.5%",
-                    glassPrice: "8",
-                    bottlePrice: "32",
-                    tastingNotes: "Red berries, watermelon, and a touch of herbal freshness.",
-                    detailedDescription: "This innovative rosé from Rioja uses the region's signature Tempranillo grape in a completely different style. The 2022 vintage saw just 6-8 hours of skin contact to achieve its vibrant pink hue. Fermented cool to preserve the grape's natural fruitiness, it shows why Tempranillo can make outstanding rosé - with more structure than most while remaining refreshing. The finish has a pleasant bitter almond note typical of the variety.",
-                    pairing: "Great with Mexican street food and mild cheeses.",
-                    criticQuote: "\"A rosé with Spanish soul - more depth than your average pink wine.\" - Decanter, 90 pts",
-                    characteristics: {
-                        color: 2,
-                        tannins: 1,
-                        sugar: 2,
-                        acidity: 3,
-                        body: 2,
-                        persistence: 2
-                    }
-                },
-
-                // Red Wines
-                pinot_noir: {
-                    name: "Pinot Noir, Errazuriz",
-                    producer: "Viña Errazuriz",
-                    region: "Casablanca Valley, Chile",
-                    type: "red",
-                    abv: "13.5%",
-                    glassPrice: "11",
-                    bottlePrice: "44",
-                    tastingNotes: "Red cherry, raspberry, and earthy notes with silky tannins.",
-                    detailedDescription: "Chile's cool Casablanca Valley proves it can produce world-class Pinot Noir with this offering from Errazuriz. The 2020 vintage comes from the estate's coastal vineyards, where morning fogs and afternoon breezes create ideal conditions for this temperamental grape. Whole cluster fermentation (30%) adds complexity, while aging in French oak (25% new) provides subtle spice. The wine shows impressive concentration for its moderate alcohol, with a long, mineral-driven finish.",
-                    pairing: "Excellent with duck, salmon, and mushroom dishes.",
-                    criticQuote: "\"Chilean Pinot Noir comes of age - this could pass for good village-level Burgundy.\" - Tim Atkin MW, 92 pts",
-                    characteristics: {
-                        color: 3,
-                        tannins: 2,
-                        sugar: 1,
-                        acidity: 3,
-                        body: 3,
-                        persistence: 4
-                    }
-                },
-                tempranillo: {
-                    name: "Tempranillo, Marqués de Riscal",
-                    producer: "Marqués de Riscal",
-                    region: "Rioja, Spain",
-                    type: "red",
-                    abv: "13.5%",
-                    glassPrice: "10",
-                    bottlePrice: "40",
-                    tastingNotes: "Red fruit, vanilla, and spice with medium tannins.",
-                    detailedDescription: "From one of Rioja's most historic bodegas, this Tempranillo represents the classic style of the region. The 2018 vintage blends fruit from Rioja Alavesa and Rioja Alta, aged 12 months in American oak (with a small percentage of French). The result is a wine that balances Tempranillo's natural vibrancy with the vanilla and coconut notes from oak. Surprisingly approachable young but with the structure to age 5-7 years. The finish shows the characteristic dried herb note of great Rioja.",
-                    pairing: "Pairs well with grilled meats, stews, and aged cheeses.",
-                    criticQuote: "\"A textbook Rioja that delivers complexity at a fair price.\" - Wine Enthusiast, 91 pts",
-                    characteristics: {
-                        color: 4,
-                        tannins: 3,
-                        sugar: 2,
-                        acidity: 3,
-                        body: 3,
-                        persistence: 3
-                    }
-                },
-                malbec: {
-                    name: "Malbec, Catena",
-                    producer: "Catena Zapata",
-                    region: "Mendoza, Argentina",
-                    type: "red",
-                    abv: "14%",
-                    glassPrice: "12",
-                    bottlePrice: "48",
-                    tastingNotes: "Plum, blackberry, and cocoa with velvety tannins.",
-                    detailedDescription: "From the family that put Argentine Malbec on the world stage, this wine comes from high-altitude vineyards (900-1,500 meters) in Mendoza. The 2019 vintage is a blend of parcels that showcases Malbec's potential when grown in cool sites. Fermented with native yeasts and aged in French oak (35% new), it shows remarkable freshness for its concentration. The wine's violet aromas and silky texture are hallmarks of Catena's style, with a long finish that reveals subtle graphite notes.",
-                    pairing: "Ideal with grilled meats, especially beef.",
-                    criticQuote: "\"Catena continues to define what great Argentine Malbec can be.\" - James Suckling, 93 pts",
-                    characteristics: {
-                        color: 5,
-                        tannins: 4,
-                        sugar: 2,
-                        acidity: 3,
-                        body: 4,
-                        persistence: 4
-                    }
-                },
-                zinfandel: {
-                    name: "Zinfandel, Ridge Vineyards",
-                    producer: "Ridge Vineyards",
-                    region: "Sonoma, California",
-                    type: "red",
-                    abv: "14.5%",
-                    bottlePrice: "65",
-                    tastingNotes: "Jammy blackberry, pepper, and spice with robust tannins.",
-                    detailedDescription: "From one of California's most iconic producers, this Zinfandel comes from old vines (some over 100 years) in Sonoma County. The 2018 vintage was fermented with native yeasts and aged in American oak (20% new). What sets Ridge apart is their restraint with Zinfandel - achieving concentration without excessive alcohol or sweetness. The wine shows impressive structure for the variety, with a peppery finish that lingers. A small amount of Petite Sirah (5%) adds backbone.",
-                    pairing: "Great with barbecue, spicy dishes, and hard cheeses.",
-                    criticQuote: "\"Ridge remains the gold standard for balanced, ageworthy Zinfandel.\" - Wine Spectator, 94 pts",
-                    characteristics: {
-                        color: 5,
-                        tannins: 4,
-                        sugar: 3,
-                        acidity: 3,
-                        body: 5,
-                        persistence: 4
-                    }
-                },
-                cabernet_sauvignon: {
-                    name: "Cabernet Sauvignon, Almaviva",
-                    producer: "Almaviva (Concha y Toro & Baron Philippe de Rothschild)",
-                    region: "Maipo Valley, Chile",
-                    type: "red",
-                    abv: "14%",
-                    bottlePrice: "120",
-                    tastingNotes: "Blackcurrant, cedar, and tobacco with firm tannins.",
-                    detailedDescription: "This Chilean 'first growth' is a joint venture between Concha y Toro and Bordeaux's Mouton Rothschild. The 2017 vintage blends Cabernet Sauvignon (68%) with Carmenère (22%), Cabernet Franc (8%), and Petit Verdot (2%). Aged 18 months in French oak (75% new), it shows remarkable complexity with aromas of cassis, cigar box, and graphite. The palate is powerful yet elegant, with tannins that promise 15+ years of aging potential. A wine that truly expresses its Chilean terroir through a Bordeaux lens.",
-                    pairing: "Perfect with prime cuts of beef and lamb.",
-                    criticQuote: "\"Almaviva proves Chile can produce wines of first-growth quality.\" - Robert Parker's Wine Advocate, 96 pts",
-                    characteristics: {
-                        color: 5,
-                        tannins: 5,
-                        sugar: 2,
-                        acidity: 3,
-                        body: 5,
-                        persistence: 5
-                    }
-                },
-                rioja_gran_reserva: {
-                    name: "Rioja Gran Reserva, La Rioja Alta",
-                    producer: "La Rioja Alta",
-                    region: "Rioja, Spain",
-                    type: "red",
-                    abv: "13.5%",
-                    bottlePrice: "85",
-                    tastingNotes: "Complex aromas of dried fruit, leather, and spice with elegant tannins.",
-                    detailedDescription: "From one of Rioja's most traditional producers, this Gran Reserva represents the pinnacle of the region's aging classification. The 2015 vintage (90% Tempranillo, 10% Graciano) spent 4 years in American oak followed by 3 years in bottle before release. The extended aging creates remarkable complexity - think dried cherry, cedar, tobacco, and vanilla, with a silky texture that only time can bring. A wine that showcases why traditional Rioja can age for decades.",
-                    pairing: "Excellent with game meats and aged Manchego cheese.",
-                    criticQuote: "\"A masterclass in traditional Rioja - complex, elegant, and timeless.\" - Decanter, 97 pts",
-                    characteristics: {
-                        color: 4,
-                        tannins: 4,
-                        sugar: 2,
-                        acidity: 3,
-                        body: 4,
-                        persistence: 5
-                    }
-                },
-
-                // Sparkling Wines
-                cava: {
-                    name: "Cava Brut, Codorníu",
-                    producer: "Codorníu",
-                    region: "Penedès, Spain",
-                    type: "sparkling",
-                    abv: "11.5%",
-                    glassPrice: "9",
-                    bottlePrice: "36",
-                    tastingNotes: "Green apple, citrus, and brioche with fine bubbles.",
-                    detailedDescription: "From Spain's oldest sparkling wine producer (founded 1551), this Cava is made in the traditional method like Champagne. The blend of Macabeo, Parellada, and Xarel-lo grapes creates a style that's fruitier than most Champagne but with similar complexity. Aged 15 months on lees, it develops subtle toast and almond notes while retaining freshness. The mousse is creamy yet energetic, with a dry finish that makes it incredibly food-friendly.",
-                    pairing: "Versatile with appetizers, fried foods, and celebrations.",
-                    criticQuote: "\"Proof that quality Cava can rival Champagne at half the price.\" - Wine Spectator, 90 pts",
-                    characteristics: {
-                        color: 1,
-                        tannins: 1,
-                        sugar: 2,
-                        acidity: 4,
-                        body: 2,
-                        persistence: 3
-                    }
-                },
-                champagne: {
-                    name: "Champagne Brut, Laurent-Perrier",
-                    producer: "Laurent-Perrier",
-                    region: "Champagne, France",
-                    type: "sparkling",
-                    abv: "12%",
-                    bottlePrice: "95",
-                    tastingNotes: "Toast, almond, and citrus with elegant effervescence.",
-                    detailedDescription: "This non-vintage Brut from Laurent-Perier is a blend of 55% Chardonnay, 30% Pinot Noir, and 15% Meunier from over 100 different crus. Aged 4 years on lees (longer than the legal minimum), it develops remarkable complexity while maintaining freshness. The dosage is just 9 g/l, making it pleasantly dry. The bubbles are exceptionally fine, forming a persistent bead that carries aromas of lemon zest, brioche, and crushed chalk.",
-                    pairing: "Perfect as an aperitif or with delicate seafood.",
-                    criticQuote: "\"Laurent-Perrier's Brut NV remains one of Champagne's most reliable values.\" - Jancis Robinson, 17.5/20",
-                    characteristics: {
-                        color: 1,
-                        tannins: 1,
-                        sugar: 2,
-                        acidity: 4,
-                        body: 3,
-                        persistence: 4
-                    }
-                },
-
-                // Dessert Wines
-                sauternes: {
-                    name: "Sauternes, Château Rieussec",
-                    producer: "Château Rieussec",
-                    region: "Bordeaux, France",
-                    type: "dessert",
-                    abv: "13.5%",
-                    glassPrice: "15",
-                    bottlePrice: "90",
-                    tastingNotes: "Honey, apricot, and tropical fruit with luscious sweetness.",
-                    detailedDescription: "From a premier cru classé estate in Sauternes, this wine is made from botrytized Sémillon (90%) with Sauvignon Blanc (5%) and Muscadelle (5%). The 2017 vintage saw exceptional botrytis development, creating intense flavors of marmalade, honey, and ginger. Aged 18 months in oak (50% new), it achieves perfect balance between sweetness (135 g/l residual sugar) and acidity. The finish lasts over a minute, evolving through layers of flavor.",
-                    pairing: "Perfect with foie gras, blue cheese, or fruit desserts.",
-                    criticQuote: "\"A benchmark Sauternes that will age gracefully for decades.\" - Robert Parker's Wine Advocate, 96 pts",
-                    characteristics: {
-                        color: 3,
-                        tannins: 1,
-                        sugar: 5,
-                        acidity: 4,
-                        body: 4,
-                        persistence: 5
-                    }
-                },
-                late_harvest: {
-                    name: "Late Harvest Sauvignon Blanc, Morandé",
-                    producer: "Viña Morandé",
-                    region: "Aconcagua, Chile",
-                    type: "dessert",
-                    abv: "11%",
-                    glassPrice: "10.5",
-                    bottlePrice: "63",
-                    tastingNotes: "Honeydew melon, jasmine, and orange blossom with balanced sweetness.",
-                    detailedDescription: "This unique dessert wine comes from Sauvignon Blanc grapes left on the vine for extended ripening in Chile's Aconcagua Valley. The 2020 vintage was harvested at 28° Brix, then fermented to 120 g/l residual sugar. What makes it special is the retention of Sauvignon Blanc's varietal character despite the sweetness - think passionfruit and grapefruit alongside the honeyed notes. Aged 6 months in neutral oak to round out the texture without adding oak flavor.",
-                    pairing: "Lovely with fruit tarts or not-too-sweet desserts.",
-                    criticQuote: "\"A dessert wine that surprises with its freshness and varietal typicity.\" - Descorchados, 93 pts",
-                    characteristics: {
-                        color: 2,
-                        tannins: 1,
-                        sugar: 4,
-                        acidity: 3,
-                        body: 3,
-                        persistence: 4
-                    }
-                }
-            };
-
-            // Menu database with allergens and pairing explanations
-            const menuDatabase = {
-                lunch: {
-                    title: "Lunch Menu",
-                    categories: [
-                        {
-                            name: "SMALL PLATES (Para Empezar)",
-                            items: [
-                                {
-                                    name: "Selection of homemade bread topped with roasted leek and coconut, and macha olives",
-                                    price: "",
-                                    allergens: "(ve)",
-                                    pairingExplanation: "The olive and leek flavors pair beautifully with crisp, herbal whites that can cut through the richness while complementing the earthy notes."
-                                },
-                                {
-                                    name: "Guacamole, pico de gallo, totopos",
-                                    price: "10.5",
-                                    allergens: "(ve, gf)",
-                                    pairingExplanation: "The creamy avocado needs a wine with good acidity to cleanse the palate. The fresh tomato and lime in the pico de gallo call for a wine with citrus notes and minerality."
-                                },
-                                {
-                                    name: "Rock shrimp tempura",
-                                    price: "14",
-                                    allergens: "",
-                                    pairingExplanation: "The delicate shrimp and crispy tempura batter require a light, crisp wine with good acidity to cut through the oil while complementing the shrimp's sweetness."
-                                },
-                                {
-                                    name: "Sashimi grade tuna tostada, pipian verde, onion seeds, garlic chips",
-                                    price: "14.7",
-                                    allergens: "(n,d,gf)",
-                                    pairingExplanation: "The rich tuna and nutty pipian verde sauce need a wine with enough body to stand up to the flavors but enough acidity to balance the dish's richness."
-                                },
-                                {
-                                    name: "Aged Hereford spicy fillet tataki, chilmole rub, crispy shallots, spring onion and coriander",
-                                    price: "15.7",
-                                    allergens: "",
-                                    pairingExplanation: "The spicy rub and rich beef require a wine with some fruitiness to balance the heat and enough structure to complement the meat's texture."
-                                },
-                                {
-                                    name: "Stone bass tiradito, mango, grapefruit, red jalapeño salsa, leek oil",
-                                    price: "15",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The citrus from the grapefruit and heat from the jalapeño need a wine with good acidity and some aromatic complexity to complement the dish's bright flavors."
-                                },
-                                {
-                                    name: "Isle of Wight tomatoes, smoked ricotta, olives, leek oil, oregano",
-                                    price: "13.7",
-                                    allergens: "(d,v)",
-                                    pairingExplanation: "The smoky ricotta and fresh tomatoes pair well with wines that have herbal notes and good acidity to cut through the cheese's richness."
-                                }
-                            ]
-                        },
-                        {
-                            name: "LARGE PLATES (Platos Fuertes)",
-                            items: [
-                                {
-                                    name: "Roasted squash, pistachio mole verde, fennel salad, sage butter, Mexican dukkah",
-                                    price: "20",
-                                    allergens: "(v,d,n)",
-                                    pairingExplanation: "The earthy squash and herbal mole verde need a wine with similar earthy characteristics and enough body to stand up to the rich sauce."
-                                },
-                                {
-                                    name: "Free range grilled achiote chicken, rajas, Mexican hummus, pico de gallo",
-                                    price: "24",
-                                    allergens: "(gf,n)",
-                                    pairingExplanation: "The smoky achiote marinade and creamy hummus pair well with medium-bodied wines that have some spice notes to complement the dish's flavors."
-                                },
-                                {
-                                    name: "Grilled stone bass, pistachio mole verde, fennel salad, sage butter, Mexican dukkah",
-                                    price: "34",
-                                    allergens: "(gf,n,d)",
-                                    pairingExplanation: "The rich fish and nutty mole need a wine with good acidity to cut through the richness and some herbal notes to complement the sauce."
-                                },
-                                {
-                                    name: "Radicchio, Escarole lettuce, smoked almonds, pear, preserved lemon vinaigrette",
-                                    price: "11.50",
-                                    allergens: "(n,ve)",
-                                    pairingExplanation: "The bitter greens and sweet pear need a wine with good acidity to balance the vinaigrette and some fruitiness to complement the pear."
-                                }
-                            ]
-                        },
-                        {
-                            name: "KIDS (Niños under 9)",
-                            items: [
-                                {
-                                    name: "Cheese quesadilla, smashed avocado and crudités (corn or flour tortilla)",
-                                    price: "8.9",
-                                    allergens: "(v, gf)",
-                                    pairingExplanation: "The creamy cheese and avocado pair well with light, crisp whites that can cut through the richness."
-                                },
-                                {
-                                    name: "Grass fed short rib quesadilla (corn or flour tortilla)",
-                                    price: "8.9",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The rich short rib needs a wine with enough body to stand up to the meat's flavor and some acidity to cut through the fat."
-                                },
-                                {
-                                    name: "Battered prawn bites, crispy potatoes, smashed avocado and ketchup",
-                                    price: "8.9",
-                                    allergens: "",
-                                    pairingExplanation: "The fried shrimp and rich avocado need a wine with good acidity to cleanse the palate and complement the seafood flavors."
-                                }
-                            ]
-                        },
-                        {
-                            name: "TACOS & QUESADILLAS (Del Comal)",
-                            note: "corn (gf), flour or lettuce shell available upon request",
-                            items: [
-                                {
-                                    name: "Ensenada taco, Mexican lager batter, pickled cucumber and carrot, scotch bonnet crema (2 pieces)",
-                                    price: "14",
-                                    allergens: "",
-                                    pairingExplanation: "The crispy fish and spicy crema need a wine with good acidity to cut through the richness and some fruitiness to balance the heat."
-                                },
-                                {
-                                    name: "Prawn adobado quesadilla, refried beans, moleslete sauce, pickled red onion (2 pieces)",
-                                    price: "15.7",
-                                    allergens: "(d)",
-                                    pairingExplanation: "The rich prawns and creamy cheese need a wine with enough body to stand up to the flavors and good acidity to cleanse the palate."
-                                },
-                                {
-                                    name: "Roasted beetroot taco, smoked almonds, beetroot jocoque, butternut squash puree (2 pieces)",
-                                    price: "12",
-                                    allergens: "(v, gf,n,d)",
-                                    pairingExplanation: "The earthy beets and nutty flavors need a wine with some earthy characteristics and good acidity to balance the dish's richness."
-                                }
-                            ]
-                        },
-                        {
-                            name: "SIDES (De la milpa)",
-                            items: [
-                                {
-                                    name: "Queso fundido con chorizo",
-                                    price: "8.5",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The rich, melted cheese and spicy chorizo need a wine with good acidity to cut through the fat and some spice notes to complement the sausage."
-                                },
-                                {
-                                    name: "Crispy potatoes, salsa verde",
-                                    price: "8.5",
-                                    allergens: "(ve, gf)",
-                                    pairingExplanation: "The crispy potatoes and herbal salsa verde pair well with crisp whites that can cleanse the palate and complement the herbs."
-                                },
-                                {
-                                    name: "Radicchio, Escarole lettuce, smoked almonds, pear, preserved lemon vinaigrette",
-                                    price: "8.5",
-                                    allergens: "(n, ve)",
-                                    pairingExplanation: "The bitter greens and sweet pear need a wine with good acidity to balance the vinaigrette and some fruitiness to complement the pear."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                dinner: {
-                    title: "Dinner Menu",
-                    categories: [
-                        {
-                            name: "SMALL PLATES (Para Empezar)",
-                            items: [
-                                {
-                                    name: "Selection of homemade bread topped with roasted leek and coconut, and macha olives",
-                                    price: "",
-                                    allergens: "(ve)",
-                                    pairingExplanation: "The olive and leek flavors pair beautifully with crisp, herbal whites that can cut through the richness while complementing the earthy notes."
-                                },
-                                {
-                                    name: "Guacamole, pico de gallo, totopos",
-                                    price: "10.5",
-                                    allergens: "(ve, gf)",
-                                    pairingExplanation: "The creamy avocado needs a wine with good acidity to cleanse the palate. The fresh tomato and lime in the pico de gallo call for a wine with citrus notes and minerality."
-                                },
-                                {
-                                    name: "Rock shrimp tempura",
-                                    price: "14",
-                                    allergens: "",
-                                    pairingExplanation: "The delicate shrimp and crispy tempura batter require a light, crisp wine with good acidity to cut through the oil while complementing the shrimp's sweetness."
-                                },
-                                {
-                                    name: "Sashimi grade tuna tostada, pipian verde, onion seeds, garlic chips",
-                                    price: "14.7",
-                                    allergens: "(n,d,gf)",
-                                    pairingExplanation: "The rich tuna and nutty pipian verde sauce need a wine with enough body to stand up to the flavors but enough acidity to balance the dish's richness."
-                                },
-                                {
-                                    name: "Aged Hereford spicy fillet tataki, chilmole rub, crispy shallots, spring onion and coriander",
-                                    price: "15.7",
-                                    allergens: "",
-                                    pairingExplanation: "The spicy rub and rich beef require a wine with some fruitiness to balance the heat and enough structure to complement the meat's texture."
-                                },
-                                {
-                                    name: "Stone bass tiradito, mango, grapefruit, red jalapeño salsa, leek oil",
-                                    price: "15",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The citrus from the grapefruit and heat from the jalapeño need a wine with good acidity and some aromatic complexity to complement the dish's bright flavors."
-                                },
-                                {
-                                    name: "Roasted hispi cabbage",
-                                    price: "11",
-                                    allergens: "(ve)",
-                                    pairingExplanation: "The caramelized cabbage needs a wine with some earthy characteristics and good acidity to balance the natural sweetness."
-                                },
-                                {
-                                    name: "Isle of Wight tomatoes, smoked ricotta, olives, leek oil, oregano",
-                                    price: "13.7",
-                                    allergens: "(d,v)",
-                                    pairingExplanation: "The smoky ricotta and fresh tomatoes pair well with wines that have herbal notes and good acidity to cut through the cheese's richness."
-                                }
-                            ]
-                        },
-                        {
-                            name: "TACOS (Del Comal)",
-                            note: "corn (gf), flour or lettuce shell available upon request",
-                            items: [
-                                {
-                                    name: "Ensenada taco, Mexican lager batter, pickled cucumber and carrot, scotch bonnet crema (2 pieces)",
-                                    price: "14",
-                                    allergens: "",
-                                    pairingExplanation: "The crispy fish and spicy crema need a wine with good acidity to cut through the richness and some fruitiness to balance the heat."
-                                },
-                                {
-                                    name: "Roasted beetroot taco, smoked almonds, beetroot jocoque, butternut squash puree (2 pieces)",
-                                    price: "12",
-                                    allergens: "(v, gf,n,d)",
-                                    pairingExplanation: "The earthy beets and nutty flavors need a wine with some earthy characteristics and good acidity to balance the dish's richness."
-                                },
-                                {
-                                    name: "Prawn adobado quesadilla, refried beans, molcajete sauce, pickled red onion (2 pieces)",
-                                    price: "14.5",
-                                    allergens: "(d)",
-                                    pairingExplanation: "The rich prawns and creamy cheese need a wine with enough body to stand up to the flavors and good acidity to cleanse the palate."
-                                },
-                                {
-                                    name: "Pork rib taco, smoky chili glaze, pickled radish, avocado puree (2 pieces)",
-                                    price: "14.7",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The rich pork and smoky glaze need a wine with some fruitiness to balance the sweetness and enough body to stand up to the meat."
-                                },
-                                {
-                                    name: "Buck Moon Special - Pork pastor, pineapple, raw tomatillo-avocado salsa, sorrel leaves",
-                                    price: "32.5",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The sweet pineapple and rich pork need a wine with good acidity to balance the sweetness and some spice notes to complement the marinade."
-                                }
-                            ]
-                        },
-                        {
-                            name: "LARGE PLATES (Platos Fuertes)",
-                            items: [
-                                {
-                                    name: "Roasted squash, pistachio mole verde, fennel salad, sage butter, Mexican dukkah",
-                                    price: "20",
-                                    allergens: "(v,gf,d,n)",
-                                    pairingExplanation: "The earthy squash and herbal mole verde need a wine with similar earthy characteristics and enough body to stand up to the rich sauce."
-                                },
-                                {
-                                    name: "Grilled stone bass, pistachio mole verde, fennel salad, sage butter, Mexican dukkah",
-                                    price: "34",
-                                    allergens: "(gf,d,n)",
-                                    pairingExplanation: "The rich fish and nutty mole need a wine with good acidity to cut through the richness and some herbal notes to complement the sauce."
-                                },
-                                {
-                                    name: "Short rib, smoky adobo, pineapple salsa",
-                                    price: "41",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The rich short rib and sweet pineapple need a full-bodied wine with enough tannins to stand up to the meat and some fruitiness to complement the salsa."
-                                },
-                                {
-                                    name: "Half Grilled chicken adobado, pickled red onion",
-                                    price: "36",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The smoky adobo marinade needs a wine with some spice notes to complement the flavors and good acidity to balance the richness."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                sunday: {
-                    title: "Sunday Lunch",
-                    categories: [
-                        {
-                            name: "SMALL PLATES (Para Empezar)",
-                            items: [
-                                {
-                                    name: "Selection of homemade bread topped with roasted leek and coconut, and macha olives",
-                                    price: "",
-                                    allergens: "(ve)",
-                                    pairingExplanation: "The olive and leek flavors pair beautifully with crisp, herbal whites that can cut through the richness while complementing the earthy notes."
-                                },
-                                {
-                                    name: "Guacamole, pico de gallo, totopos",
-                                    price: "10.5",
-                                    allergens: "(ve, gf)",
-                                    pairingExplanation: "The creamy avocado needs a wine with good acidity to cleanse the palate. The fresh tomato and lime in the pico de gallo call for a wine with citrus notes and minerality."
-                                },
-                                {
-                                    name: "Rock shrimp tempura - served with burnt aubergine dip and avocado puree",
-                                    price: "14",
-                                    allergens: "",
-                                    pairingExplanation: "The delicate shrimp and rich dips need a wine with good acidity to cut through the richness and complement the seafood flavors."
-                                },
-                                {
-                                    name: "Aged Hereford spicy fillet tataki, chilmole rub, crispy shallots, spring onion and coriander",
-                                    price: "15.7",
-                                    allergens: "",
-                                    pairingExplanation: "The spicy rub and rich beef require a wine with some fruitiness to balance the heat and enough structure to complement the meat's texture."
-                                },
-                                {
-                                    name: "Stone bass tiradito, mango, grapefruit, red jalapeño salsa, leek oil",
-                                    price: "15",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The citrus from the grapefruit and heat from the jalapeño need a wine with good acidity and some aromatic complexity to complement the dish's bright flavors."
-                                },
-                                {
-                                    name: "Sashimi grade tuna tostada, pipian verde, onion seeds, garlic chips",
-                                    price: "14.7",
-                                    allergens: "(n,d,gf)",
-                                    pairingExplanation: "The rich tuna and nutty pipian verde sauce need a wine with enough body to stand up to the flavors but enough acidity to balance the dish's richness."
-                                }
-                            ]
-                        },
-                        {
-                            name: "TACOS & QUESADILLAS (Del Comal)",
-                            note: "corn (gf), flour or lettuce shell available upon request",
-                            items: [
-                                {
-                                    name: "Ensenada taco, Mexican lager batter, pickled cucumber and carrot, scotch bonnet crema (2 pieces)",
-                                    price: "14",
-                                    allergens: "",
-                                    pairingExplanation: "The crispy fish and spicy crema need a wine with good acidity to cut through the richness and some fruitiness to balance the heat."
-                                },
-                                {
-                                    name: "Roasted beetroot taco, smoked almonds, beetroot jocoque, butternut squash puree (2 pieces)",
-                                    price: "12",
-                                    allergens: "(v, n,d,gf)",
-                                    pairingExplanation: "The earthy beets and nutty flavors need a wine with some earthy characteristics and good acidity to balance the dish's richness."
-                                },
-                                {
-                                    name: "Prawn adobado quesadilla, refried beans, mokajele sauce, pickled red onion (2 pieces)",
-                                    price: "15.7",
-                                    allergens: "(d)",
-                                    pairingExplanation: "The rich prawns and creamy cheese need a wine with enough body to stand up to the flavors and good acidity to cleanse the palate."
-                                },
-                                {
-                                    name: "Pork rib taco, smoky chili glaze, pickled radish, avocado puree (2 pieces)",
-                                    price: "14.7",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The rich pork and smoky glaze need a wine with some fruitiness to balance the sweetness and enough body to stand up to the meat."
-                                }
-                            ]
-                        },
-                        {
-                            name: "GRILL AND ROAST (Parilla y Asado)",
-                            note: "All our mains are served with all the trimmings: roasted vegetables, crispy potatoes, queso fundido, mini corn jalapeño bread",
-                            items: [
-                                {
-                                    name: "Roasted cauliflower, veggie jus, salsa macha",
-                                    price: "29",
-                                    allergens: "(ve, gf)",
-                                    pairingExplanation: "The roasted cauliflower and rich salsa macha need a wine with some earthy characteristics and good acidity to balance the dish's richness."
-                                },
-                                {
-                                    name: "Half Grilled chicken adobado, pickled red onion",
-                                    price: "36",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The smoky adobo marinade needs a wine with some spice notes to complement the flavors and good acidity to balance the richness."
-                                },
-                                {
-                                    name: "Braised lamb shank barbacoa",
-                                    price: "34",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The rich, slow-cooked lamb needs a full-bodied wine with enough tannins to stand up to the meat and some earthy characteristics to complement the barbacoa."
-                                },
-                                {
-                                    name: "450g T-bone chili and coriander marinade (to share)",
-                                    price: "65",
-                                    allergens: "(gf)",
-                                    pairingExplanation: "The hearty steak and spicy marinade need a bold, full-bodied wine with enough structure to stand up to the meat and some fruitiness to balance the spice."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            };
-
-            // Base de datos ampliada de descripciones de platos
-            const dishDescriptions = {
-                "Selection of homemade bread topped with roasted leek and coconut, and macha olives": {
-                    description: "Nuestro pan artesanal es un tributo a la tradición mexicana con un toque moderno. Cada pieza es horneada a diario utilizando técnicas ancestrales, coronada con una mezcla seductora de puerro asado y coco que crea un contraste entre lo terroso y lo tropical. Las aceitunas macha, marinadas en aceite de chile, añaden un toque picante que despierta el paladar. ¿Sabías que la combinación de coco y puerro era considerada afrodisíaca por los antiguos mayas?",
-                    funFact: "El pan en México tiene más de 500 variedades regionales, y nuestras recetas se inspiran en las técnicas de Oaxaca."
-                },
-                "Guacamole, pico de gallo, totopos": {
-                    description: "Nuestro guacamole es una celebración del aguacate mexicano, preparado al momento con fruta en su punto exacto de madurez. La receta secreta incluye un toque de cilantro recién picado y jugo de limón persa, variedad que llegó a México con los españoles pero que ahora es esencial en nuestra cocina. Los totopos son hechos a mano de maíz nixtamalizado y fritos en aceite de aguacate para una textura perfecta - crujiente pero nunca grasosa.",
-                    funFact: "El nombre 'guacamole' viene del náhuatl 'ahuacamolli' - salsa de aguacate. Los aztecas lo consideraban un alimento afrodisíaco."
-                },
-                "Rock shrimp tempura": {
-                    description: "Nuestra versión del tempura de camarón rinde homenaje a la histórica conexión entre México y Japón. Los camarones salvajes se envuelven en una masa etérea hecha con cerveza mexicana artesanal, creando una textura que es a la vez crujiente y ligera. Se sirve con nuestra salsa secreta de berenjena quemada - un guiño a las técnicas de ahumado prehispánicas - y puré de aguacate cremoso. La presentación en forma de 'torre' es nuestro homenaje a las pirámides mesoamericanas.",
-                    funFact: "El puerto de Ensenada en Baja California tiene una de las mayores poblaciones de descendientes japoneses en México, resultado de la migración a principios del siglo XX."
-                },
-                "Sashimi grade tuna tostada, pipian verde, onion seeds, garlic chips": {
-                    description: "Esta creación fusiona lo mejor de la cocina de mar mexicana con técnicas japonesas. El atún sashimi de grado superior se corta a mano y se coloca sobre una tostada de maíz azul hecha a mano. El pipián verde - una salsa ancestral a base de pepitas de calabaza - añade un elemento terroso, mientras que las semillas de cebolla y los chips de ajo aportan textura. El plato se completa con una lluvia de sal de gusano, un ingrediente prehispánico que realza los sabores del mar.",
-                    funFact: "El pipián era considerado alimento de los dioses por los aztecas y se servía en ceremonias importantes."
-                },
-                "Aged Hereford spicy fillet tataki, chilmole rub, crispy shallots, spring onion and coriander": {
-                    description: "Nuestro filete Hereford madurado representa el encuentro entre las carnes premium británicas y las especias mexicanas. El chilmole - una mezcla ancestral de chiles secos y cacao - forma una costra picante que contrasta con la ternura de la carne. Las chalotas crujientes añaden textura, mientras que la cebollina y el cilantro frescos aportan vivacidad. Se sirve con una reducción de caldo de huesos aromatizado con hierbas de Oaxaca.",
-                    funFact: "El proceso de maduración en seco (dry aging) fue desarrollado por los vaqueros mexicanos en el siglo XIX para preservar la carne durante los largos trayectos."
-                },
-                "Stone bass tiradito, mango, grapefruit, red jalapeño salsa, leek oil": {
-                    description: "Nuestra interpretación del tiradito peruano con acento mexicano. El robalo se corta en finas láminas y se marina brevemente en jugo de limón amarillo. El mango y el pomelo añaden dulzor y acidez, mientras que la salsa de jalapeño rojo aporta un toque de calor controlado. El aceite de puerro, infusionado con hierbas locales, añade un elemento sorpresa que une todos los sabores. Presentado como un 'cuadro abstracto' en el plato.",
-                    funFact: "El tiradito fue creado por pescadores japoneses en Perú, inspirándose en el sashimi pero usando ingredientes locales."
-                },
-                "Isle of Wight tomatoes, smoked ricotta, olives, leek oil, oregano": {
-                    description: "Este plato celebra el tomate en su forma más pura. Los tomates Isle of Wight, conocidos por su intenso sabor, se alternan con queso ricotta ahumado artesanal. Las aceitunas kalamata aportan un contraste salado, mientras que el aceite de puerro y el orégano fresco mexicano (más aromático que su primo mediterráneo) completan la composición. Un homenaje vegetariano a los sabores frescos de la huerta.",
-                    funFact: "El tomate es originario de México y fue llevado a Europa por los españoles en el siglo XVI."
-                },
-                "Roasted squash, pistachio mole verde, fennel salad, sage butter, Mexican dukkah": {
-                    description: "Una reinterpretación vegetariana de los clásicos moles mexicanos. La calabaza asada hasta alcanzar caramelización natural se acompaña de un mole verde inusual hecho con pistaches en lugar de pepitas tradicionales. La ensalada de hinojo aporta frescura, mientras que la mantequilla de salvia y el dukkah mexicano (una mezcla de especias tostadas y nueces) añaden capas de sabor y textura. Un plato que desafía las expectativas de la cocina vegetariana.",
-                    funFact: "El mole más antiguo, el mole prieto, se remonta a la época prehispánica y se preparaba para ceremonias religiosas."
-                },
-                "Free range grilled achiote chicken, rajas, Mexican hummus, pico de gallo": {
-                    description: "Nuestro pollo de corral es marinado durante 24 horas en una pasta de achiote casera, dándole ese característico color rojizo y un sabor ligeramente terroso. Las rajas (tiras de chile poblano asado) añaden un toque ahumado, mientras que nuestro 'hummus mexicano' (hecho con frijoles bayos en lugar de garbanzos) aporta cremosidad. El pico de gallo fresco con cilantro y cebolla morada completa este homenaje a la cocina de mercado.",
-                    funFact: "El achiote fue usado por los mayas como pigmento corporal y como condimento, y era considerado un regalo de los dioses."
-                },
-                "Grilled stone bass, pistachio mole verde, fennel salad, sage butter, Mexican dukkah": {
-                    description: "El robalo a la parrilla es el lienzo perfecto para nuestro innovador mole verde de pistacho. La piel se cocina hasta quedar crujiente, contrastando con la carne jugosa. El hinojo en juliana marinado en jugo de naranja agria corta la riqueza del mole, mientras que la mantequilla de salvia y el dukkah mexicano (con nueces de Castilla y especias tostadas) añaden complejidad. Un plato que muestra cómo evoluciona la cocina mexicana contemporánea.",
-                    funFact: "El robalo era considerado un manjar por los antiguos habitantes de las costas mexicanas y aparecía en sus códices."
-                },
-                "Radicchio, Escarole lettuce, smoked almonds, pear, preserved lemon vinaigrette": {
-                    description: "Esta ensalada es un estudio de contrastes: la amargura del radicchio, la frescura de la escarola, la dulzura de la pera y la acidez intensa del limón conservado. Las almendras ahumadas aportan un elemento terroso y crujiente, mientras que la vinagreta de limón conservado (preparado con sal de gusano) une todos los elementos. Un plato aparentemente simple que revela complejidad con cada bocado.",
-                    funFact: "Las técnicas de conservación con limón y sal fueron desarrolladas por los navegantes españoles y adoptadas en la cocina mexicana."
-                },
-                "Cheese quesadilla, smashed avocado and crudités (corn or flour tortilla)": {
-                    description: "Nuestra versión infantil de la quesadilla usa queso Chihuahua artesanal fundido entre tortillas recién hechas (de maíz o harina, según prefiera). El aguacate machacado añade cremosidad, mientras que los crudités (zanahoria, pepino y jícama) aportan frescura y crujido. Se sirve con nuestra salsa 'secreta' de tomate asado - lo suficientemente suave para los paladares jóvenes pero con suficiente carácter para complacer a los adultos.",
-                    funFact: "La palabra 'quesadilla' viene del náhuatl 'quetzaditzin' que significa 'tortilla doblada'."
-                },
-                "Grass fed short rib quesadilla (corn or flour tortilla)": {
-                    description: "Una quesadilla elevada con costilla de res alimentada con pasto, cocinada a baja temperatura hasta alcanzar una textura melosa. El queso Oaxaca fundido envuelve la carne en un abrazo reconfortante, mientras que la tortilla (hecha a mano al momento) aporta el contraste perfecto de textura. Acompañada de guacamole y crema agria artesanal. Un plato que demuestra que lo 'simple' puede ser extraordinario cuando se usan ingredientes excepcionales.",
-                    funFact: "El queso Oaxaca se originó cuando los monjes españoles enseñaron a los locales a hacer queso tipo mozzarella, que evolucionó a este estilo único."
-                },
-                "Battered prawn bites, crispy potatoes, smashed avocado and ketchup": {
-                    description: "Nuestras croquetas de camarón son un guiño a los clásicos fish and chips británicos, pero con ingredientes y técnicas mexicanas. Los camarones silvestres se envuelven en una masa de cerveza oscura mexicana y se fríen a la perfección. Las papas crujientes se sazonan con chile en polvo y lima, mientras que el aguacate machacado y el kétchup de tamarindo añaden elementos familiares pero con un giro mexicano. Un plato que une culturas a través del marisco.",
-                    funFact: "El puerto de Veracruz fue el primer lugar donde se prepararon platillos fritos en México, influenciado por los españoles."
-                },
-                "Ensenada taco, Mexican lager batter, pickled cucumber and carrot, scotch bonnet crema (2 pieces)": {
-                    description: "Nuestro taco estilo Ensenada es un homenaje a la famosa cocina de Baja California. El pescado fresco se envuelve en una masa hecha con cerveza lager artesanal mexicana, creando una textura increíblemente ligera y aireada. Los encurtidos de pepino y zanahoria aportan acidez y frescura, mientras que la crema de chile scotch bonnet (cultivado localmente en invernadero) añade un toque de calor controlado. Servido en tortillas de maíz azul hechas a mano.",
-                    funFact: "El taco de pescado estilo Ensenada fue creado por inmigrantes japoneses en Baja California en los años 50."
-                },
-                "Prawn adobado quesadilla, refried beans, moleslete sauce, pickled red onion (2 pieces)": {
-                    description: "Una quesadilla elevada con camarones adobados en una mezcla secreta de chiles ancho y guajillo. Los frijoles refritos (hechos con frijol negro y manteca de cerdo ibérico) añaden profundidad, mientras que la salsa moleslete (una fusión de mole y queso fundido) aporta riqueza y complejidad. La cebolla roja encurtida corta la grasa y refresca el paladar. Servida en tortillas de maíz hechas a mano y doradas a la perfección.",
-                    funFact: "El adobo fue desarrollado como método de conservación en la época colonial, usando chiles y vinagre."
-                },
-                "Roasted beetroot taco, smoked almonds, beetroot jocoque, butternut squash puree (2 pieces)": {
-                    description: "Un taco vegetariano que desafía expectativas. La remolacha asada hasta concentrar sus azúcares naturales se combina con almendras ahumadas y un jocoque (yogur estilo mexicano) de remolacha que añade acidez y color. El puré de calabaza butternut aporta dulzor y cremosidad. Servido en tortillas de maíz morado con una lluvia de semillas de amaranth tostadas - un grano sagrado para los aztecas.",
-                    funFact: "El amaranto fue prohibido por los españoles por su uso en rituales religiosos aztecas, pero sobrevivió como cultivo clandestino."
-                },
-                "Queso fundido con chorizo": {
-                    description: "Nuestra versión del clásico queso fundido usa una mezcla de quesos Chihuahua, Oaxaca y manchego español, creando una textura elástica pero fluida. El chorizo artesanal (elaborado con receta familiar) se dora hasta quedar crujiente, liberando sus aceites especiados que se integran con el queso. Servido en cazuela de barro caliente con tortillas recién hechas y salsa de tomatillo asado. Un plato aparentemente simple que depende totalmente de la calidad de sus pocos ingredientes.",
-                    funFact: "El chorizo llegó a México con los españoles pero evolucionó para incluir chiles locales, creando un producto único."
-                },
-                "Crispy potatoes, salsa verde": {
-                    description: "Nuestras papas crujientes son el acompañamiento perfecto, cocinadas en tres etapas para lograr un exterior dorado y un interior cremoso. La salsa verde (hecha con tomatillo, chile serrano y cilantro) aporta frescura y picante controlado. Espolvoreadas con queso cotija añejado y crema agria espesa. Un lado que a menudo roba el protagonismo a los platos principales.",
-                    funFact: "El tomatillo es originario de México y ha sido cultivado desde la época prehispánica, mucho antes que el tomate rojo."
-                },
-                "Buck Moon Special - Pork pastor, pineapple, raw tomatillo-avocado salsa, sorrel leaves": {
-                    description: "Nuestro especial 'Luna de Ciervo' es un homenaje al pastor tradicional pero con técnicas modernas. La carne de cerdo se marina en una mezcla de chiles guajillo, achiote y especias, luego se asa lentamente en trompo vertical. La piña caramelizada añade dulzor, mientras que la salsa cruda de tomatillo y aguacate aporta frescura. Las hojas de acedera añaden un contraste ácido. Servido con tortillas recién hechas y cebolla morada encurtida.",
-                    funFact: "El pastor llegó a México con inmigrantes libaneses a principios del siglo XX, adaptando el shawarma a ingredientes locales."
-                },
-                "Short rib, smoky adobo, pineapple salsa": {
-                    description: "Nuestra costilla corta se cocina a baja temperatura durante 36 horas hasta alcanzar una textura que se deshace al tenedor. El adobo ahumado (con chiles chipotle y mezquite) forma una costra intensa, mientras que la salsa de piña asada añade frescura tropical. Acompañada de puré de camote morado (una variedad ancestral) y gremolata de cilantro. Un plato que muestra la evolución de las técnicas de barbacoa mexicanas.",
-                    funFact: "La barbacoa mexicana tiene sus raíces en los hoyos de cocción prehispánicos llamados 'pib', aún usados en Yucatán."
-                },
-                "Half Grilled chicken adobado, pickled red onion": {
-                    description: "Nuestro pollo adobado es marinado durante 48 horas en una mezcla compleja de chiles ancho, pasilla y especias, luego se asa a la parrilla sobre carbón de mezquite. La piel queda crujiente y caramelizada, mientras que la carne permanece jugosa. La cebolla roja encurtida con naranja agria y hierbas de olor corta la riqueza del adobo. Servido con arroz rojo estilo Jalisco y frijoles charros.",
-                    funFact: "El adobo varía por región en México - nuestra versión se inspira en las recetas tradicionales de Puebla."
-                },
-                "Roasted hispi cabbage (ve)": {
-                    description: "La col hispi (o repollo puntiagudo) se asa entera hasta que las hojas exteriores se caramelizan mientras el corazón permanece tierno. Se sirve con un jugo vegetal reducido y salsa macha (una mezcla de chiles secos, ajo y aceite) que añade profundidad umami. Espolvoreado con semillas de calabaza tostadas y hierbas frescas. Un plato vegetariano que demuestra cómo las técnicas modernas pueden elevar ingredientes humildes.",
-                    funFact: "La salsa macha tiene sus orígenes en Veracruz, donde se preparaba con los chiles locales y aceite de oliva traído por los españoles."
-                },
-                "Pork rib taco, smoky chili glaze, pickled radish, avocado puree (2 pieces)": {
-                    description: "Nuestro taco de costilla de cerdo es un estudio de contrastes: la carne tierna desprendiéndose del hueso, la salsa glaseada ahumada, el rábano encurtido crujiente y el puré de aguacate cremoso. La tortilla de maíz azul hecha a mano completa esta sinfonía de texturas. Un taco que requiere ser comido con ambas manos y que inevitablemente termina con los dedos llenos de glaseado - como debe ser.",
-                    funFact: "El maíz azul contiene antocianinas, los mismos antioxidantes que se encuentran en los arándanos."
-                },
-                "Roasted cauliflower, veggie jus, salsa macha": {
-                    description: "Nuestra coliflor entera asada es un espectáculo en sí mismo - dorada por fuera, tierna por dentro, con las hojas crujientes como chips naturales. El jugo vegetal concentrado añade profundidad umami, mientras que la salsa macha (con cacahuates y chiles secos) aporta textura y calor controlado. Servida con una crema de ajo negro y polvo de huitlacoche (el 'caviar azteca'). Un plato vegetariano que satisface incluso a los carnívoros más acérrimos.",
-                    funFact: "El huitlacoche es un hongo que crece en el maíz, considerado una delicadeza desde la época azteca."
-                },
-                "Braised lamb shank barbacoa": {
-                    description: "Nuestra pierna de cordero estilo barbacoa se cocina a baja temperatura durante 12 horas en un hoyo sellado con hojas de plátano y maguey, siguiendo técnicas ancestrales. La carne se desprende del hueso y se sirve con su jugo reducido, acompañada de cebollas cambray asadas y salsa borracha (hecha con pulque, el fermentado ancestral del agave). Un plato que conecta directamente con las raíces más profundas de la cocina mexicana.",
-                    funFact: "La barbacoa tradicional mexicana es considerada Patrimonio Cultural Inmaterial por la UNESCO."
-                },
-                "450g T-bone chili and coriander marinade (to share)": {
-                    description: "Nuestro chuletón T-bone es seleccionado a mano de ganado criado en pastos, con un marmoleo perfecto. La marinada de chiles secos y cilantro fresco penetra la carne sin ablandarla artificialmente. Se sirve con hueso para que los comensales puedan disfrutar del tuétano asado - considerado un manje en la cocina mexicana. Acompañado de papas cambray asadas con hierbas y mantequilla de chapulines (saltamontes tostados, una proteína ancestral).",
-                    funFact: "Los chapulines han sido parte de la dieta mexicana desde la época prehispánica y son una fuente sostenible de proteína."
-                }
-            };
-
-            // Precise pairing recommendations for each dish
-            const pairingRecommendations = {
-                // Lunch menu dishes
-                "Selection of homemade bread topped with roasted leek and coconut, and macha olives": {
-                    glass: ["verdejo", "sauvignon_blanc", "cava"],
-                    mid: ["gruner_veltliner", "verdejo", "provence_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The herbal notes in the Verdejo mirror the roasted leek, while its crisp acidity cuts through the richness of the coconut. The wine's slight bitterness complements the olives beautifully.",
-                        sauvignon_blanc: "The grapefruit and fresh herb characteristics create a refreshing contrast to the earthy leek and rich coconut, cleansing the palate between bites.",
-                        cava: "The effervescence acts like a palate cleanser, resetting your taste buds for each new flavor. The subtle brioche notes in the Cava echo the homemade bread.",
-                        gruner_veltliner: "The white pepper notes in Grüner Veltliner find an echo in the macha olives' spice, while its body stands up to the bread's texture.",
-                        provence_rose: "The strawberry notes provide a fruity counterpoint to the savory elements, and the dry finish balances the coconut's richness.",
-                        champagne: "The complexity and acidity of Champagne elevate every component - the leek's earthiness, the coconut's creaminess, and the olives' spice."
-                    }
-                },
-                "Guacamole, pico de gallo, totopos": {
-                    glass: ["verdejo", "sauvignon_blanc", "cava"],
-                    mid: ["verdejo", "gruner_veltliner", "provence_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The citrus and herbal notes in Verdejo complement the lime and cilantro in the guacamole, while its acidity cuts through the avocado's richness.",
-                        sauvignon_blanc: "The grapefruit character mirrors the lime in the pico de gallo, and the wine's grassy notes play well with the fresh tomato.",
-                        cava: "The bubbles scrub the palate clean of avocado's fat, while the wine's subtle almond notes echo the toasted corn in the totopos.",
-                        gruner_veltliner: "The peppery finish stands up to the jalapeño heat (if any), while the wine's citrus elements complement the lime.",
-                        provence_rose: "The dry strawberry fruit provides a nice counterpoint to the creamy avocado, and the wine's minerality matches the salt on the chips.",
-                        champagne: "The perfect celebratory pairing - the acidity cuts through the fat while the fine bubbles lift all the flavors."
-                    }
-                },
-                "Rock shrimp tempura": {
-                    glass: ["verdejo", "sauvignon_blanc", "cava"],
-                    mid: ["gruner_veltliner", "verdejo", "provence_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The wine's citrus zest character complements the shrimp's sweetness, while its acidity cuts through the fried batter.",
-                        sauvignon_blanc: "The grapefruit notes provide a refreshing contrast to the rich tempura, cleansing the palate between bites.",
-                        cava: "The effervescence acts like a palate cleanser, while the wine's subtle yeastiness complements the fried elements.",
-                        gruner_veltliner: "The white pepper notes add an interesting dimension to the shrimp, while the wine's body stands up to the frying.",
-                        provence_rose: "The dry strawberry fruit provides a nice counterpoint to the seafood, and the wine's minerality matches the salt.",
-                        champagne: "The ultimate pairing - the acidity and bubbles cut through the richness while complementing the delicate shrimp."
-                    }
-                },
-                "Sashimi grade tuna tostada, pipian verde, onion seeds, garlic chips": {
-                    glass: ["verdejo", "gruner_veltliner", "pinot_noir"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The wine's herbal notes complement the pipian verde, while its acidity balances the rich tuna.",
-                        gruner_veltliner: "The peppery character mirrors the onion seeds, and the wine's body stands up to the dish's textures.",
-                        pinot_noir: "The red fruit and earthy notes complement the tuna and pipian, while the silky tannins handle the richness.",
-                        tempranillo_rose: "The berry fruit plays well with the tuna, while the wine's structure stands up to the pipian.",
-                        champagne: "The ultimate pairing - the acidity and bubbles cut through all elements while complementing the dish's complexity."
-                    }
-                },
-                "Aged Hereford spicy fillet tataki, chilmole rub, crispy shallots, spring onion and coriander": {
-                    glass: ["pinot_noir", "tempranillo", "malbec"],
-                    mid: ["pinot_noir", "tempranillo", "malbec"],
-                    premium: ["rioja_gran_reserva"],
-                    pairingNotes: {
-                        pinot_noir: "The red fruit balances the spice, while the earthy notes complement the chilmole rub.",
-                        tempranillo: "The vanilla and spice from oak aging mirror the rub's complexity, while the tannins handle the beef.",
-                        malbec: "The plum fruit stands up to the spice, while the velvety tannins complement the beef's texture.",
-                        rioja_gran_reserva: "The developed leather and dried fruit notes add another layer of complexity to the pairing."
-                    }
-                },
-                "Stone bass tiradito, mango, grapefruit, red jalapeño salsa, leek oil": {
-                    glass: ["verdejo", "gruner_veltliner", "chardonnay"],
-                    mid: ["chardonnay", "gruner_veltliner", "pinot_noir"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The citrus zest character complements the grapefruit, while the herbal notes play well with the leek oil.",
-                        gruner_veltliner: "The white pepper note stands up to the jalapeño heat, while the citrus balances the mango.",
-                        chardonnay: "The richer texture handles the leek oil, while the apple/pear fruit complements the stone bass.",
-                        pinot_noir: "A surprising pairing where the red fruit complements the mango and the acidity balances the heat.",
-                        champagne: "The bubbles and acidity cut through all elements while complementing the dish's brightness."
-                    }
-                },
-                "Isle of Wight tomatoes, smoked ricotta, olives, leek oil, oregano": {
-                    glass: ["provence_rose", "verdejo", "pinot_noir"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["pinot_noir"],
-                    pairingNotes: {
-                        provence_rose: "The strawberry fruit complements the tomatoes, while the dryness balances the ricotta.",
-                        verdejo: "The herbal notes mirror the oregano, while the acidity cuts through the cheese.",
-                        pinot_noir: "The red fruit complements the tomatoes, while the earthy notes play well with the smoked ricotta."
-                    }
-                },
-                "Roasted squash, pistachio mole verde, fennel salad, sage butter, Mexican dukkah": {
-                    glass: ["gruner_veltliner", "provence_rose", "pinot_noir"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["pinot_noir"],
-                    pairingNotes: {
-                        gruner_veltliner: "The earthy notes complement the squash, while the peppery character stands up to the mole.",
-                        provence_rose: "The dry fruit provides contrast to the squash's sweetness, while the minerality matches the dukkah.",
-                        pinot_noir: "The red fruit and earthy notes complement all elements, while the acidity cuts through the richness."
-                    }
-                },
-                "Free range grilled achiote chicken, rajas, Mexican hummus, pico de gallo": {
-                    glass: ["tempranillo", "pinot_noir", "provence_rose"],
-                    mid: ["tempranillo", "pinot_noir", "malbec"],
-                    premium: ["rioja_gran_reserva"],
-                    pairingNotes: {
-                        tempranillo: "The spice notes complement the achiote, while the structure stands up to the chicken.",
-                        pinot_noir: "The red fruit complements the pico de gallo, while the earthy notes play well with the hummus.",
-                        provence_rose: "The dry fruit provides contrast to the achiote's richness, cleansing the palate.",
-                        malbec: "The plum fruit stands up to the spices, while the velvety texture complements the chicken.",
-                        rioja_gran_reserva: "The developed complexity adds another layer to this already flavorful dish."
-                    }
-                },
-                "Grilled stone bass, pistachio mole verde, fennel salad, sage butter, Mexican dukkah": {
-                    glass: ["verdejo", "chardonnay", "gruner_veltliner"],
-                    mid: ["chardonnay", "gruner_veltliner", "pinot_noir"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The herbal notes complement the mole verde, while the acidity cuts through the sage butter.",
-                        chardonnay: "The richer texture stands up to the mole, while the apple/pear fruit complements the fish.",
-                        gruner_veltliner: "The peppery note complements the dukkah, while the acidity balances the dish.",
-                        pinot_noir: "An unexpected pairing where the red fruit complements the mole and the acidity balances the richness.",
-                        champagne: "The ultimate pairing - the bubbles and acidity cut through all elements while complementing the fish."
-                    }
-                },
-                "Radicchio, Escarole lettuce, smoked almonds, pear, preserved lemon vinaigrette": {
-                    glass: ["gruner_veltliner", "verdejo", "provence_rose"],
-                    mid: ["verdejo", "gruner_veltliner", "pinot_noir"],
-                    premium: ["pinot_noir"],
-                    pairingNotes: {
-                        gruner_veltliner: "The peppery note complements the bitter greens, while the citrus balances the vinaigrette.",
-                        verdejo: "The herbal notes mirror the greens, while the acidity matches the lemon.",
-                        provence_rose: "The dry fruit provides contrast to the bitterness, while the minerality matches the almonds.",
-                        pinot_noir: "The red fruit complements the pear, while the earthy notes play well with the greens."
-                    }
-                },
-                "Cheese quesadilla, smashed avocado and crudités (corn or flour tortilla)": {
-                    glass: ["verdejo", "sauvignon_blanc", "cava"],
-                    mid: ["verdejo", "gruner_veltliner", "provence_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The citrus and herbal notes complement the avocado, while the acidity cuts through the cheese.",
-                        sauvignon_blanc: "The grapefruit character provides a refreshing contrast to the richness.",
-                        cava: "The bubbles scrub the palate clean, while the subtle yeastiness complements the tortilla.",
-                        gruner_veltliner: "The peppery finish adds interest, while the acidity balances the fat.",
-                        provence_rose: "The dry strawberry fruit provides a nice counterpoint to the cheese.",
-                        champagne: "The perfect celebratory pairing for even the youngest gourmands."
-                    }
-                },
-                "Grass fed short rib quesadilla (corn or flour tortilla)": {
-                    glass: ["tempranillo", "pinot_noir", "malbec"],
-                    mid: ["tempranillo", "pinot_noir", "malbec"],
-                    premium: ["rioja_gran_reserva"],
-                    pairingNotes: {
-                        tempranillo: "The spice notes complement the meat, while the structure stands up to the richness.",
-                        pinot_noir: "The red fruit complements the beef, while the acidity cuts through the cheese.",
-                        malbec: "The plum fruit stands up to the meat, while the velvety tannins handle the fat.",
-                        rioja_gran_reserva: "The developed complexity adds another layer to this rich dish."
-                    }
-                },
-                "Battered prawn bites, crispy potatoes, smashed avocado and ketchup": {
-                    glass: ["verdejo", "sauvignon_blanc", "cava"],
-                    mid: ["gruner_veltliner", "verdejo", "provence_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The citrus zest character complements the shrimp, while its acidity cuts through the fried batter.",
-                        sauvignon_blanc: "The grapefruit notes provide a refreshing contrast to the richness.",
-                        cava: "The effervescence acts like a palate cleanser, while the subtle yeastiness complements the frying.",
-                        gruner_veltliner: "The white pepper notes add an interesting dimension to the shrimp.",
-                        provence_rose: "The dry strawberry fruit provides a nice counterpoint to the seafood.",
-                        champagne: "The ultimate pairing - fun and sophisticated at once."
-                    }
-                },
-                "Ensenada taco, Mexican lager batter, pickled cucumber and carrot, scotch bonnet crema (2 pieces)": {
-                    glass: ["verdejo", "gruner_veltliner", "cava"],
-                    mid: ["gruner_veltliner", "verdejo", "tempranillo_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The citrus and herbal notes complement the pickles, while the acidity cuts through the batter.",
-                        gruner_veltliner: "The peppery character stands up to the scotch bonnet heat.",
-                        cava: "The bubbles scrub the palate clean of heat and fat, refreshing for the next bite.",
-                        tempranillo_rose: "The berry fruit provides contrast to the heat, while the acidity balances the richness.",
-                        champagne: "The ultimate pairing - the acidity and bubbles handle all elements beautifully."
-                    }
-                },
-                "Prawn adobado quesadilla, refried beans, moleslete sauce, pickled red onion (2 pieces)": {
-                    glass: ["verdejo", "gruner_veltliner", "pinot_noir"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The herbal notes complement the adobo, while the acidity cuts through the cheese.",
-                        gruner_veltliner: "The peppery character stands up to the spices, while the body handles the richness.",
-                        pinot_noir: "The red fruit complements the prawns, while the earthy notes play well with the beans.",
-                        tempranillo_rose: "The berry fruit provides contrast to the spices, while the structure stands up to the dish.",
-                        champagne: "The bubbles and acidity cut through all elements while complementing the flavors."
-                    }
-                },
-                "Roasted beetroot taco, smoked almonds, beetroot jocoque, butternut squash puree (2 pieces)": {
-                    glass: ["gruner_veltliner", "pinot_noir", "provence_rose"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["pinot_noir"],
-                    pairingNotes: {
-                        gruner_veltliner: "The earthy notes complement the beets, while the peppery character stands up to the almonds.",
-                        pinot_noir: "The red fruit and earthy notes complement all elements beautifully.",
-                        provence_rose: "The dry fruit provides contrast to the earthiness, while the minerality matches the almonds.",
-                        tempranillo_rose: "The berry fruit provides a nice counterpoint to the earthy elements."
-                    }
-                },
-                "Queso fundido con chorizo": {
-                    glass: ["tempranillo", "pinot_noir", "malbec"],
-                    mid: ["tempranillo", "pinot_noir", "malbec"],
-                    premium: ["rioja_gran_reserva"],
-                    pairingNotes: {
-                        tempranillo: "The spice notes complement the chorizo, while the tannins handle the cheese.",
-                        pinot_noir: "The red fruit provides contrast to the richness, while the acidity cuts through the fat.",
-                        malbec: "The plum fruit stands up to the spices, while the velvety tannins complement the cheese.",
-                        rioja_gran_reserva: "The developed complexity adds another layer to this rich dish."
-                    }
-                },
-                "Crispy potatoes, salsa verde": {
-                    glass: ["verdejo", "sauvignon_blanc", "gruner_veltliner"],
-                    mid: ["gruner_veltliner", "verdejo", "provence_rose"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The herbal notes complement the salsa verde, while the acidity cuts through the fried potatoes.",
-                        sauvignon_blanc: "The grassy character mirrors the herbs in the salsa, refreshing the palate.",
-                        gruner_veltliner: "The peppery finish stands up to any heat in the salsa, while the acidity balances the fat.",
-                        provence_rose: "The dry fruit provides contrast to the saltiness, while the minerality matches the potatoes.",
-                        champagne: "The ultimate pairing - the bubbles and acidity make each bite taste like the first."
-                    }
-                },
-                
-                // Dinner menu dishes
-                "Buck Moon Special - Pork pastor, pineapple, raw tomatillo-avocado salsa, sorrel leaves": {
-                    glass: ["zinfandel", "tempranillo", "malbec"],
-                    mid: ["zinfandel", "tempranillo", "malbec"],
-                    premium: ["cabernet_sauvignon"],
-                    pairingNotes: {
-                        zinfandel: "The jammy fruit complements the pineapple, while the peppery notes match the pastor spices.",
-                        tempranillo: "The vanilla and spice from oak aging complement the marinade, while the structure stands up to the pork.",
-                        malbec: "The plum fruit stands up to the rich pork, while the velvety tannins handle the fat.",
-                        cabernet_sauvignon: "The cassis fruit and firm tannins provide a sophisticated counterpoint to this flavorful dish."
-                    }
-                },
-                "Grilled stone bass, pistachio mole verde, fennel salad, sage butter, Mexican dukkah": {
-                    glass: ["verdejo", "chardonnay", "gruner_veltliner"],
-                    mid: ["chardonnay", "gruner_veltliner", "pinot_noir"],
-                    premium: ["champagne"],
-                    pairingNotes: {
-                        verdejo: "The herbal notes complement the mole verde, while the acidity cuts through the sage butter.",
-                        chardonnay: "The richer texture stands up to the mole, while the apple/pear fruit complements the fish.",
-                        gruner_veltliner: "The peppery note complements the dukkah, while the acidity balances the dish.",
-                        pinot_noir: "An unexpected pairing where the red fruit complements the mole and the acidity balances the richness.",
-                        champagne: "The ultimate pairing - the bubbles and acidity cut through all elements while complementing the fish."
-                    }
-                },
-                "Short rib, smoky adobo, pineapple salsa": {
-                    glass: ["malbec", "tempranillo", "zinfandel"],
-                    mid: ["malbec", "tempranillo", "zinfandel"],
-                    premium: ["cabernet_sauvignon"],
-                    pairingNotes: {
-                        malbec: "The plum fruit stands up to the rich meat, while the velvety tannins handle the fat.",
-                        tempranillo: "The spice notes complement the adobo, while the structure stands up to the short rib.",
-                        zinfandel: "The jammy fruit complements the pineapple salsa, while the peppery notes match the smoke.",
-                        cabernet_sauvignon: "The cassis fruit and firm tannins provide a sophisticated counterpoint to this rich dish."
-                    }
-                },
-                "Half Grilled chicken adobado, pickled red onion": {
-                    glass: ["tempranillo", "pinot_noir", "zinfandel"],
-                    mid: ["tempranillo", "zinfandel", "malbec"],
-                    premium: ["rioja_gran_reserva"],
-                    pairingNotes: {
-                        tempranillo: "The spice notes complement the adobo, while the structure stands up to the chicken.",
-                        pinot_noir: "The red fruit provides contrast to the spices, while the acidity cuts through the richness.",
-                        zinfandel: "The jammy fruit stands up to the marinade, while the peppery notes complement the spices.",
-                        malbec: "The plum fruit provides a nice counterpoint to the adobo flavors.",
-                        rioja_gran_reserva: "The developed complexity adds another layer to this flavorful dish."
-                    }
-                },
-                "Roasted hispi cabbage (ve)": {
-                    glass: ["gruner_veltliner", "pinot_noir", "provence_rose"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["pinot_noir"],
-                    pairingNotes: {
-                        gruner_veltliner: "The earthy notes complement the roasted cabbage, while the peppery character adds interest.",
-                        pinot_noir: "The red fruit and earthy notes complement the caramelized flavors beautifully.",
-                        provence_rose: "The dry fruit provides contrast to the earthiness, while the minerality matches the dish.",
-                        tempranillo_rose: "The berry fruit provides a nice counterpoint to the roasted flavors."
-                    }
-                },
-                "Pork rib taco, smoky chili glaze, pickled radish, avocado puree (2 pieces)": {
-                    glass: ["zinfandel", "tempranillo", "malbec"],
-                    mid: ["zinfandel", "tempranillo", "malbec"],
-                    premium: ["cabernet_sauvignon"],
-                    pairingNotes: {
-                        zinfandel: "The jammy fruit complements the glaze's sweetness, while the peppery notes match the smoke.",
-                        tempranillo: "The spice notes complement the pork, while the structure stands up to the richness.",
-                        malbec: "The plum fruit stands up to the meat, while the velvety tannins handle the fat.",
-                        cabernet_sauvignon: "The cassis fruit and firm tannins provide a sophisticated counterpoint to this flavorful taco."
-                    }
-                },
-                
-                // Sunday lunch dishes
-                "Roasted cauliflower, veggie jus, salsa macha": {
-                    glass: ["gruner_veltliner", "pinot_noir", "provence_rose"],
-                    mid: ["pinot_noir", "gruner_veltliner", "tempranillo_rose"],
-                    premium: ["pinot_noir"],
-                    pairingNotes: {
-                        gruner_veltliner: "The earthy notes complement the roasted cauliflower, while the peppery character stands up to the salsa macha.",
-                        pinot_noir: "The red fruit and earthy notes complement all elements beautifully.",
-                        provence_rose: "The dry fruit provides contrast to the earthiness, while the minerality matches the salsa.",
-                        tempranillo_rose: "The berry fruit provides a nice counterpoint to the roasted flavors."
-                    }
-                },
-                "Braised lamb shank barbacoa": {
-                    glass: ["malbec", "tempranillo", "zinfandel"],
-                    mid: ["malbec", "tempranillo", "zinfandel"],
-                    premium: ["cabernet_sauvignon"],
-                    pairingNotes: {
-                        malbec: "The plum fruit stands up to the rich lamb, while the velvety tannins handle the fat.",
-                        tempranillo: "The spice notes complement the barbacoa spices, while the structure stands up to the meat.",
-                        zinfandel: "The jammy fruit provides contrast to the earthy flavors, while the peppery notes match the spices.",
-                        cabernet_sauvignon: "The cassis fruit and firm tannins provide a sophisticated counterpoint to this rich dish."
-                    }
-                },
-                "450g T-bone chili and coriander marinade (to share)": {
-                    glass: ["malbec", "zinfandel", "cabernet_sauvignon"],
-                    mid: ["malbec", "zinfandel", "cabernet_sauvignon"],
-                    premium: ["cabernet_sauvignon", "rioja_gran_reserva"],
-                    pairingNotes: {
-                        malbec: "The plum fruit stands up to the rich steak, while the velvety tannins handle the fat.",
-                        zinfandel: "The jammy fruit complements the marinade's spices, while the peppery notes add complexity.",
-                        cabernet_sauvignon: "The cassis fruit and firm tannins are classic with steak, standing up to the marinade.",
-                        rioja_gran_reserva: "The developed leather and dried fruit notes add another layer of complexity to this pairing."
-                    }
-                }
-            };
-
-            // Show selected menu
-            function showMenu(menuId) {
-                const menu = menuDatabase[menuId];
-                document.getElementById('menuTitle').textContent = menu.title;
-                
-                const menuContent = document.getElementById('menuContent');
-                menuContent.innerHTML = '';
-                
-                menu.categories.forEach(category => {
-                    const categoryElement = document.createElement('div');
-                    categoryElement.className = 'menu-category';
-                    
-                    const categoryTitle = document.createElement('h4');
-                    categoryTitle.className = 'text-2xl font-bold text-amber-400 mb-6 border-b border-amber-400 pb-2 header-font';
-                    categoryTitle.textContent = category.name;
-                    categoryElement.appendChild(categoryTitle);
-                    
-                    if (category.note) {
-                        const noteElement = document.createElement('p');
-                        noteElement.className = 'text-sm text-amber-200 italic mb-4';
-                        noteElement.textContent = category.note;
-                        categoryElement.appendChild(noteElement);
-                    }
-                    
-                    const itemsList = document.createElement('div');
-                    itemsList.className = 'space-y-4';
-                    
-                    category.items.forEach(item => {
-                        const itemElement = document.createElement('div');
-                        itemElement.className = 'menu-item p-4 rounded-lg';
-                        
-                        const itemContent = document.createElement('div');
-                        itemContent.className = 'flex justify-between items-start';
-                        
-                        const itemText = document.createElement('div');
-                        
-                        const nameElement = document.createElement('p');
-                        nameElement.className = 'text-gray-100 font-medium';
-                        nameElement.textContent = item.name;
-                        itemText.appendChild(nameElement);
-                        
-                        if (item.allergens) {
-                            const allergenElement = document.createElement('p');
-                            allergenElement.className = 'text-xs text-amber-400 mt-1';
-                            allergenElement.textContent = item.allergens;
-                            itemText.appendChild(allergenElement);
-                        }
-                        
-                        itemContent.appendChild(itemText);
-                        
-                        if (item.price) {
-                            const priceElement = document.createElement('p');
-                            priceElement.className = 'text-amber-400 font-medium whitespace-nowrap ml-4';
-                            priceElement.textContent = `£${item.price}`;
-                            itemContent.appendChild(priceElement);
-                            
-                            // Contenedor para botones
-                            const buttonsContainer = document.createElement('div');
-                            buttonsContainer.className = 'flex gap-2 ml-4';
-                            
-                            // Botón de descripción
-                            if (dishDescriptions[item.name]) {
-                                const descButton = document.createElement('button');
-                                descButton.className = 'bg-gray-700 hover:bg-gray-600 text-amber-300 px-4 py-2 rounded-full font-medium text-sm transition-all transform hover:scale-105';
-                                descButton.textContent = 'Dish Story';
-                                descButton.onclick = function() { showDishDescription(item.name); };
-                                buttonsContainer.appendChild(descButton);
-                            }
-                            
-                            // Botón de wine pairing
-                            if (pairingRecommendations[item.name]) {
-                                const pairingButton = document.createElement('button');
-                                pairingButton.className = 'gold-gradient hover:opacity-90 text-gray-900 px-4 py-2 rounded-full font-medium text-sm transition-all transform hover:scale-105';
-                                pairingButton.textContent = 'Wine Pairing';
-                                pairingButton.onclick = function() { 
-                                    showDishPairing(
-                                        item.name, 
-                                        item.allergens, 
-                                        item.price,
-                                        item.pairingExplanation
-                                    ); 
-                                };
-                                buttonsContainer.appendChild(pairingButton);
-                            }
-                            
-                            itemContent.appendChild(buttonsContainer);
-                        }
-                        
-                        itemElement.appendChild(itemContent);
-                        itemsList.appendChild(itemElement);
-                    });
-                    
-                    categoryElement.appendChild(itemsList);
-                    menuContent.appendChild(categoryElement);
-                });
-                
-                document.getElementById('menuDisplay').classList.remove('hidden');
-                document.getElementById('menuDisplay').classList.add('fade-in');
-                document.getElementById('dishDisplay').classList.add('hidden');
-            }
-            
-            // Hide menu display
-            function hideMenu() {
-                document.getElementById('menuDisplay').classList.add('hidden');
-            }
-            
-            // Show dish with wine pairing
-            function showDishPairing(dishName, allergens, price, pairingExplanation) {
-                document.getElementById('dishTitle').textContent = `${dishName} ${price ? '£' + price : ''}`;
-                
-                // Display allergens
-                const allergenElement = document.getElementById('dishAllergens');
-                if (allergens) {
-                    allergenElement.textContent = `Allergens: ${allergens}`;
-                } else {
-                    allergenElement.textContent = '';
-                }
-                
-                // Display pairing explanation
-                const explanationElement = document.getElementById('pairingExplanation');
-                if (pairingExplanation) {
-                    explanationElement.textContent = pairingExplanation;
-                } else {
-                    explanationElement.textContent = '';
-                }
-                
-                const pairing = pairingRecommendations[dishName];
-                
-                // Clear previous recommendations
-                document.getElementById('glassWines').innerHTML = '';
-                document.getElementById('midWines').innerHTML = '';
-                document.getElementById('premiumWines').innerHTML = '';
-                
-                // Display by the glass recommendations
-                if (pairing && pairing.glass) {
-                    pairing.glass.forEach(wineId => {
-                        const wine = wineDatabase[wineId];
-                        if (wine) {
-                            addWineCard('glassWines', wine, true, pairing.pairingNotes[wineId]);
-                        }
-                    });
-                }
-                
-                // Display mid-range recommendations
-                if (pairing && pairing.mid) {
-                    pairing.mid.forEach(wineId => {
-                        const wine = wineDatabase[wineId];
-                        if (wine) {
-                            addWineCard('midWines', wine, false, pairing.pairingNotes[wineId]);
-                        }
-                    });
-                }
-                
-                // Display premium recommendations
-                if (pairing && pairing.premium) {
-                    pairing.premium.forEach(wineId => {
-                        const wine = wineDatabase[wineId];
-                        if (wine) {
-                            addWineCard('premiumWines', wine, false, pairing.pairingNotes[wineId]);
-                        }
-                    });
-                }
-                
-                // Show the dish display and hide menu
-                document.getElementById('menuDisplay').classList.add('hidden');
-                document.getElementById('dishDisplay').classList.remove('hidden');
-                document.getElementById('dishDisplay').classList.add('fade-in');
-                
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            
-            // Hide dish display
-            function hideDish() {
-                document.getElementById('dishDisplay').classList.add('hidden');
-                document.getElementById('menuDisplay').classList.remove('hidden');
-            }
-            
-            // Add wine card to the specified container
-            function addWineCard(containerId, wine, showGlassPrice, pairingNote) {
-                const container = document.getElementById(containerId);
-                
-                const card = document.createElement('div');
-                card.className = 'wine-card p-6 rounded-lg';
-                
-                // Wine name and type
-                const nameElement = document.createElement('h5');
-                nameElement.className = 'font-semibold text-amber-400 mb-2 text-lg header-font';
-                nameElement.textContent = wine.name;
-                card.appendChild(nameElement);
-                
-                // Producer and region
-                const producerElement = document.createElement('p');
-                producerElement.className = 'text-sm text-gray-400 mb-1';
-                producerElement.textContent = `${wine.producer} | ${wine.region}`;
-                card.appendChild(producerElement);
-                
-                // ABV
-                const abvElement = document.createElement('p');
-                abvElement.className = 'text-xs text-gray-500 mb-3';
-                abvElement.textContent = `ABV: ${wine.abv}`;
-                card.appendChild(abvElement);
-                
-                // Price
-                const priceElement = document.createElement('p');
-                priceElement.className = 'text-amber-300 font-medium mb-4';
-                
-                if (showGlassPrice && wine.glassPrice) {
-                    priceElement.textContent = `£${wine.glassPrice} per glass / £${wine.bottlePrice} per bottle`;
-                } else {
-                    priceElement.textContent = `£${wine.bottlePrice} per bottle`;
-                }
-                card.appendChild(priceElement);
-                
-                // Tasting notes
-                const notesElement = document.createElement('p');
-                notesElement.className = 'text-sm text-gray-300 mb-4 italic';
-                notesElement.textContent = `"${wine.tastingNotes}"`;
-                card.appendChild(notesElement);
-                
-                // Pairing notes
-                if (pairingNote) {
-                    const pairingElement = document.createElement('p');
-                    pairingElement.className = 'text-xs text-amber-200 mb-4';
-                    pairingElement.textContent = `Pairing Insight: ${pairingNote}`;
-                    card.appendChild(pairingElement);
-                }
-                
-                // Details button
-                const button = document.createElement('button');
-                button.className = 'gold-gradient hover:opacity-90 text-gray-900 px-4 py-2 rounded-full font-medium text-sm transition-all transform hover:scale-105';
-                button.textContent = 'View Wine Details';
-                button.onclick = function() { showWineDetails(wine); };
-                card.appendChild(button);
-                
-                container.appendChild(card);
-            }
-            
-            // Show dish description modal
-            function showDishDescription(dishName) {
-                const description = dishDescriptions[dishName]?.description || "Detailed description not available.";
-                const funFact = dishDescriptions[dishName]?.funFact || "";
-
-                const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 modal';
-                modal.id = 'dishModal';
-                
-                const modalContent = document.createElement('div');
-                modalContent.className = 'bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full border gold-border dish-description-modal';
-                
-                const modalHeader = document.createElement('div');
-                modalHeader.className = 'bg-gray-900 text-white p-6 rounded-t-lg flex justify-between items-center border-b gold-border';
-                
-                const modalTitle = document.createElement('h3');
-                modalTitle.className = 'text-2xl font-bold text-amber-400 header-font';
-                modalTitle.textContent = dishName;
-                modalHeader.appendChild(modalTitle);
-                
-                const closeButton = document.createElement('button');
-                closeButton.innerHTML = '&times;';
-                closeButton.className = 'text-3xl text-amber-400 hover:text-white';
-                closeButton.onclick = function() { document.body.removeChild(modal); };
-                modalHeader.appendChild(closeButton);
-                
-                modalContent.appendChild(modalHeader);
-                
-                const modalBody = document.createElement('div');
-                modalBody.className = 'p-6';
-                
-                const descriptionElement = document.createElement('p');
-                descriptionElement.className = 'text-gray-300 mb-6';
-                descriptionElement.textContent = description;
-                modalBody.appendChild(descriptionElement);
-                
-                if (funFact) {
-                    const funFactElement = document.createElement('div');
-                    funFactElement.className = 'bg-gray-900 p-4 rounded-lg border gold-border';
-                    
-                    const funFactTitle = document.createElement('h4');
-                    funFactTitle.className = 'font-semibold text-lg text-amber-400 mb-2 header-font';
-                    funFactTitle.textContent = 'Did You Know?';
-                    funFactElement.appendChild(funFactTitle);
-                    
-                    const funFactText = document.createElement('p');
-                    funFactText.className = 'text-gray-300 italic';
-                    funFactText.textContent = funFact;
-                    funFactElement.appendChild(funFactText);
-                    
-                    modalBody.appendChild(funFactElement);
-                }
-                
-                modalContent.appendChild(modalBody);
-                modal.appendChild(modalContent);
-                document.body.appendChild(modal);
-                
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        document.body.removeChild(modal);
-                    }
-                });
-            }
-            
-            // Show wine details modal
-            function showWineDetails(wine) {
-                // Create modal container
-                const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 modal';
-                modal.id = 'wineModal';
-                
-                // Create modal content
-                const modalContent = document.createElement('div');
-                modalContent.className = 'bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border gold-border';
-                
-                // Modal header
-                const modalHeader = document.createElement('div');
-                modalHeader.className = 'bg-gray-900 text-white p-6 rounded-t-lg flex justify-between items-center border-b gold-border';
-                
-                const modalTitle = document.createElement('h3');
-                modalTitle.className = 'text-2xl font-bold text-amber-400 header-font';
-                modalTitle.textContent = wine.name;
-                modalHeader.appendChild(modalTitle);
-                
-                const closeButton = document.createElement('button');
-                closeButton.innerHTML = '&times;';
-                closeButton.className = 'text-3xl text-amber-400 hover:text-white';
-                closeButton.onclick = function() { document.body.removeChild(modal); };
-                modalHeader.appendChild(closeButton);
-                
-                modalContent.appendChild(modalHeader);
-                
-                // Modal body
-                const modalBody = document.createElement('div');
-                modalBody.className = 'p-6';
-                
-                // Producer and region
-                const producerSection = document.createElement('div');
-                producerSection.className = 'mb-6';
-                
-                const producerTitle = document.createElement('h4');
-                producerTitle.className = 'font-semibold text-xl text-amber-400 mb-2 header-font';
-                producerTitle.textContent = 'Producer & Region';
-                producerSection.appendChild(producerTitle);
-                
-                const producerText = document.createElement('p');
-                producerText.className = 'text-gray-300';
-                producerText.textContent = `${wine.producer} | ${wine.region} | ${wine.abv} ABV`;
-                producerSection.appendChild(producerText);
-                
-                modalBody.appendChild(producerSection);
-                
-                // Detailed description
-                const descSection = document.createElement('div');
-                descSection.className = 'mb-8';
-                
-                const descTitle = document.createElement('h4');
-                descTitle.className = 'font-semibold text-xl text-amber-400 mb-3 header-font';
-                descTitle.textContent = 'Wine Profile';
-                descSection.appendChild(descTitle);
-                
-                const descText = document.createElement('p');
-                descText.className = 'text-gray-300';
-                descText.textContent = wine.detailedDescription;
-                descSection.appendChild(descText);
-                
-                modalBody.appendChild(descSection);
-                
-                // Tasting notes
-                const tastingSection = document.createElement('div');
-                tastingSection.className = 'mb-8';
-                
-                const tastingTitle = document.createElement('h4');
-                tastingTitle.className = 'font-semibold text-xl text-amber-400 mb-3 header-font';
-                tastingTitle.textContent = 'Tasting Notes';
-                tastingSection.appendChild(tastingTitle);
-                
-                const tastingText = document.createElement('p');
-                tastingText.className = 'text-gray-300 italic';
-                tastingText.textContent = `"${wine.tastingNotes}"`;
-                tastingSection.appendChild(tastingText);
-                
-                modalBody.appendChild(tastingSection);
-                
-                // Characteristics
-                const characteristicsSection = document.createElement('div');
-                characteristicsSection.className = 'mb-8';
-                
-                const characteristicsTitle = document.createElement('h4');
-                characteristicsTitle.className = 'font-semibold text-xl text-amber-400 mb-6 header-font';
-                characteristicsTitle.textContent = 'Wine Characteristics';
-                characteristicsSection.appendChild(characteristicsTitle);
-                
-                // Characteristics grid
-                const characteristicsGrid = document.createElement('div');
-                characteristicsGrid.className = 'grid grid-cols-5 gap-6 text-sm';
-                
-                // Color
-                const colorContainer = document.createElement('div');
-                colorContainer.className = 'text-center';
-                
-                const colorLabel = document.createElement('div');
-                colorLabel.className = 'font-medium text-amber-300 mb-2';
-                colorLabel.textContent = 'Color';
-                colorContainer.appendChild(colorLabel);
-                
-                const colorBar = document.createElement('div');
-                colorBar.className = 'h-40 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-lg relative';
-                
-                const colorIndicator = document.createElement('div');
-                colorIndicator.className = 'absolute bottom-0 left-0 right-0 bg-amber-400 wine-characteristic';
-                colorIndicator.style.height = `${wine.characteristics.color * 20}%`;
-                
-                colorBar.appendChild(colorIndicator);
-                colorContainer.appendChild(colorBar);
-                
-                const colorValue = document.createElement('div');
-                colorValue.className = 'font-medium text-amber-300 mt-2';
-                colorValue.textContent = wine.characteristics.color + '/5';
-                colorContainer.appendChild(colorValue);
-                
-                characteristicsGrid.appendChild(colorContainer);
-                
-                // Tannins
-                const tanninsContainer = document.createElement('div');
-                tanninsContainer.className = 'text-center';
-                
-                const tanninsLabel = document.createElement('div');
-                tanninsLabel.className = 'font-medium text-amber-300 mb-2';
-                tanninsLabel.textContent = 'Tannins';
-                tanninsContainer.appendChild(tanninsLabel);
-                
-                const tanninsBar = document.createElement('div');
-                tanninsBar.className = 'h-40 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-lg relative';
-                
-                const tanninsIndicator = document.createElement('div');
-                tanninsIndicator.className = 'absolute bottom-0 left-0 right-0 bg-amber-400 wine-characteristic';
-                tanninsIndicator.style.height = `${wine.characteristics.tannins * 20}%`;
-                
-                tanninsBar.appendChild(tanninsIndicator);
-                tanninsContainer.appendChild(tanninsBar);
-                
-                const tanninsValue = document.createElement('div');
-                tanninsValue.className = 'font-medium text-amber-300 mt-2';
-                tanninsValue.textContent = wine.characteristics.tannins + '/5';
-                tanninsContainer.appendChild(tanninsValue);
-                
-                characteristicsGrid.appendChild(tanninsContainer);
-                
-                // Sugar
-                const sugarContainer = document.createElement('div');
-                sugarContainer.className = 'text-center';
-                
-                const sugarLabel = document.createElement('div');
-                sugarLabel.className = 'font-medium text-amber-300 mb-2';
-                sugarLabel.textContent = 'Sugar';
-                sugarContainer.appendChild(sugarLabel);
-                
-                const sugarBar = document.createElement('div');
-                sugarBar.className = 'h-40 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-lg relative';
-                
-                const sugarIndicator = document.createElement('div');
-                sugarIndicator.className = 'absolute bottom-0 left-0 right-0 bg-amber-400 wine-characteristic';
-                sugarIndicator.style.height = `${wine.characteristics.sugar * 20}%`;
-                
-                sugarBar.appendChild(sugarIndicator);
-                sugarContainer.appendChild(sugarBar);
-                
-                const sugarValue = document.createElement('div');
-                sugarValue.className = 'font-medium text-amber-300 mt-2';
-                sugarValue.textContent = wine.characteristics.sugar + '/5';
-                sugarContainer.appendChild(sugarValue);
-                
-                characteristicsGrid.appendChild(sugarContainer);
-                
-                // Acidity
-                const acidityContainer = document.createElement('div');
-                acidityContainer.className = 'text-center';
-                
-                const acidityLabel = document.createElement('div');
-                acidityLabel.className = 'font-medium text-amber-300 mb-2';
-                acidityLabel.textContent = 'Acidity';
-                acidityContainer.appendChild(acidityLabel);
-                
-                const acidityBar = document.createElement('div');
-                acidityBar.className = 'h-40 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-lg relative';
-                
-                const acidityIndicator = document.createElement('div');
-                acidityIndicator.className = 'absolute bottom-0 left-0 right-0 bg-amber-400 wine-characteristic';
-                acidityIndicator.style.height = `${wine.characteristics.acidity * 20}%`;
-                
-                acidityBar.appendChild(acidityIndicator);
-                acidityContainer.appendChild(acidityBar);
-                
-                const acidityValue = document.createElement('div');
-                acidityValue.className = 'font-medium text-amber-300 mt-2';
-                acidityValue.textContent = wine.characteristics.acidity + '/5';
-                acidityContainer.appendChild(acidityValue);
-                
-                characteristicsGrid.appendChild(acidityContainer);
-                
-                // Persistence
-                const persistenceContainer = document.createElement('div');
-                persistenceContainer.className = 'text-center';
-                
-                const persistenceLabel = document.createElement('div');
-                persistenceLabel.className = 'font-medium text-amber-300 mb-2';
-                persistenceLabel.textContent = 'Persistence';
-                persistenceContainer.appendChild(persistenceLabel);
-                
-                const persistenceBar = document.createElement('div');
-                persistenceBar.className = 'h-40 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-lg relative';
-                
-                const persistenceIndicator = document.createElement('div');
-                persistenceIndicator.className = 'absolute bottom-0 left-0 right-0 bg-amber-400 wine-characteristic';
-                persistenceIndicator.style.height = `${wine.characteristics.persistence * 20}%`;
-                
-                persistenceBar.appendChild(persistenceIndicator);
-                persistenceContainer.appendChild(persistenceBar);
-                
-                const persistenceValue = document.createElement('div');
-                persistenceValue.className = 'font-medium text-amber-300 mt-2';
-                persistenceValue.textContent = wine.characteristics.persistence + '/5';
-                persistenceContainer.appendChild(persistenceValue);
-                
-                characteristicsGrid.appendChild(persistenceContainer);
-                
-                characteristicsSection.appendChild(characteristicsGrid);
-                modalBody.appendChild(characteristicsSection);
-                
-                // Food pairing
-                const pairingSection = document.createElement('div');
-                pairingSection.className = 'mb-8';
-                
-                const pairingTitle = document.createElement('h4');
-                pairingTitle.className = 'font-semibold text-xl text-amber-400 mb-3 header-font';
-                pairingTitle.textContent = 'Food Pairing';
-                pairingSection.appendChild(pairingTitle);
-                
-                const pairingText = document.createElement('p');
-                pairingText.className = 'text-gray-300';
-                pairingText.textContent = wine.pairing;
-                pairingSection.appendChild(pairingText);
-                
-                modalBody.appendChild(pairingSection);
-                
-                // Critic quote
-                if (wine.criticQuote) {
-                    const quoteSection = document.createElement('div');
-                    quoteSection.className = 'bg-gray-900 p-6 rounded-lg border gold-border';
-                    
-                    const quoteTitle = document.createElement('h4');
-                    quoteTitle.className = 'font-semibold text-lg text-amber-400 mb-3 header-font';
-                    quoteTitle.textContent = 'Critical Acclaim';
-                    quoteSection.appendChild(quoteTitle);
-                    
-                    const quoteText = document.createElement('p');
-                    quoteText.className = 'text-gray-300 italic';
-                    quoteText.textContent = wine.criticQuote;
-                    quoteSection.appendChild(quoteText);
-                    
-                    modalBody.appendChild(quoteSection);
-                }
-                
-                modalContent.appendChild(modalBody);
-                modal.appendChild(modalContent);
-                
-                // Add modal to body
-                document.body.appendChild(modal);
-                
-                // Close modal when clicking outside
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        document.body.removeChild(modal);
-                    }
-                });
-            }
-        </script>
+        <!-- Food Menu Section -->
+        <main id="food-menu-container">
+            <!-- Menu content will be generated here by JavaScript -->
+        </main>
     </div>
+
+    <!-- Modal for Pairing and Details -->
+    <div id="pairing-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transform scale-95">
+            <!-- Modal content will be generated here by JavaScript -->
+        </div>
+    </div>
+
+
+    <script>
+    // --- DATABASE ---
+
+    // Standard UK Allergens (FSA)
+    const ALLERGENS_UK = {
+        gluten: { name: "Gluten", icon: "G" },
+        crustaceans: { name: "Crustaceans", icon: "Cr" },
+        eggs: { name: "Eggs", icon: "E" },
+        fish: { name: "Fish", icon: "F" },
+        peanuts: { name: "Peanuts", icon: "P" },
+        soybeans: { name: "Soybeans", icon: "S" },
+        milk: { name: "Dairy", icon: "M" },
+        nuts: { name: "Nuts", icon: "N" },
+        celery: { name: "Celery", icon: "Ce" },
+        mustard: { name: "Mustard", icon: "Mu" },
+        sesame: { name: "Sesame", icon: "Se" },
+        sulphites: { name: "Sulphites", icon: "SO₂" },
+        lupin: { name: "Lupin", icon: "L" },
+        molluscs: { name: "Molluscs", icon: "Mo" },
+    };
+
+    // Food Menu from 'ixchel london dishes 2025.pdf' (Complete)
+    const foodMenu = [
+        // Small Plates
+        {
+            id: 1, name: "GUACAMOLE", category: "Small Plates",
+            description: "A vibrant and fresh preparation of the iconic Mexican dip. Perfectly ripe avocados are mashed with jalapeño, red onion, cilantro, and lime to create a creamy and zesty classic.",
+            ingredients: ["Avocado", "jalapeño chili", "red onion", "cilantro", "lime", "tortilla strips", "pico de gallo"],
+            history: "Originating with the Aztecs, 'āhuacamōlli' (Nahuatl for 'avocado sauce') has been a staple for centuries, believed to provide strength and act as an aphrodisiac.",
+            allergens: [], pairingTags: ['starter', 'fresh', 'citrus', 'vegetarian', 'avocado']
+        },
+        {
+            id: 2, name: "HOMEMADE BREAD FOCACCIA", category: "Small Plates",
+            description: "A unique take on Italian focaccia with Mexican influences. Soft, airy bread garnished with leek and coconut, served with a complex guajillo chili oil and seaweed-seasoned butter.",
+            ingredients: ["Flour", "yeast", "leek", "coconut", "salsa macha", "guajillo chili oil", "kombu and nori butter"],
+            history: "This dish represents a culinary dialogue between Mexico and the world, infusing a European classic with native Mexican chiles and salsas.",
+            allergens: ["gluten", "milk", "nuts", "sesame"], pairingTags: ['starter', 'rich', 'fusion', 'savory']
+        },
+        {
+            id: 3, name: "ROCK SHRIMP TEMPURA", category: "Small Plates",
+            description: "Crispy, light tempura-battered rock shrimp tossed in an 'adobo enchilado'. Served with a smoky charred eggplant purée and creamy avocado dressing.",
+            ingredients: ["Shrimp", "adobo enchilado", "tempura flour", "charred eggplant purée", "avocado dressing"],
+            history: "A nod to the Japanese culinary influence in Mexico, particularly in coastal regions. Tempura techniques are paired with a classic Mexican adobo for a spicy kick.",
+            allergens: ["crustaceans", "gluten", "eggs"], pairingTags: ['seafood', 'fried', 'spicy', 'rich']
+        },
+        {
+            id: 4, name: "TUNA TOSTADA", category: "Small Plates",
+            description: "Delicate sashimi-grade tuna on a crisp tostada, complemented by a complex green pipián sauce, pico de gallo, and a hint of red jalapeño chili oil.",
+            ingredients: ["Sashimi-grade tuna", "green pipián", "pico de gallo", "red jalapeño chili oil", "fried garlic"],
+            history: "A modern creation from coastal regions like Baja California, blending the Mexican tostada with Japanese-influenced raw fish preparations.",
+            allergens: ["fish", "sesame"], pairingTags: ['raw_fish', 'citrus', 'light', 'elegant', 'nutty']
+        },
+        {
+            id: 5, name: "FILLET TATAKI", category: "Small Plates",
+            description: "Lightly seared aged beef fillet in a chilmole marinade, sliced and served with a zesty black aguachile and a purée of 'toreados' (blistered chiles).",
+            ingredients: ["Aged beef fillet", "chilmole marinade", "black aguachile", "toreados purée"],
+            history: "Tataki is a Japanese searing technique. Here, it's fully embraced by Mexican flavors like chilmole, a dark, smoky paste from the Yucatán Peninsula.",
+            allergens: ["soybeans", "fish"], pairingTags: ['beef', 'raw_beef', 'smoky', 'elegant', 'umami']
+        },
+        {
+            id: 6, name: "STONE BASS TIRADITO", category: "Small Plates",
+            description: "Thin slices of fresh stone bass, lightly cured in a vibrant aguachile of mango, grapefruit, lime, and red chili. A refreshing and citrus-forward dish.",
+            ingredients: ["Stone bass", "mango", "grapefruit", "lime", "red chili", "orange aguachile"],
+            history: "Tiradito is a Peruvian dish reflecting Japanese influence, similar to sashimi. It has been widely adopted in Mexico, where aguachile provides the perfect zesty marinade.",
+            allergens: ["fish"], pairingTags: ['raw_fish', 'citrus', 'light', 'fruity', 'spicy']
+        },
+        {
+            id: 26, name: "ISLE OF WIGHT TOMATOES", category: "Small Plates",
+            description: "A celebration of British produce with a Mediterranean-Mexican twist. Sweet Isle of Wight tomatoes are paired with creamy ricotta, sharp Kalamata olives, and a bright leek oil and lemon dressing.",
+            ingredients: ["Leek oil", "seasonal tomato", "Ricotta cheese", "red onion", "Kalamata olive", "olive oil", "oregano", "lemon juice"],
+            history: "This dish highlights the modern culinary trend of using high-quality, local seasonal produce within a global flavor framework. It's a nod to both Italian Caprese salads and Mexican 'ensaladas frescas'.",
+            allergens: ["milk"], pairingTags: ['starter', 'vegetarian', 'fresh', 'light', 'tomato']
+        },
+        // Del Comal
+        {
+            id: 7, name: "ENSENADA TACO", category: "Del Comal",
+            description: "A classic Baja California fish taco. Beer-battered fish is fried until golden and served in a tortilla with pickled vegetables and a creamy, spicy scotch bonnet mayonnaise.",
+            ingredients: ["Fish", "beer tempura", "pickled cucumber", "pickled carrot", "scotch bonnet mayonnaise"],
+            history: "Born in the port city of Ensenada, the fish taco is a hallmark of Baja cuisine, celebrated for its perfect contrast of crispy fish, soft tortilla, and tangy toppings.",
+            allergens: ["fish", "gluten", "eggs", "mustard"], pairingTags: ['taco', 'seafood', 'fried', 'spicy', 'creamy']
+        },
+        {
+            id: 8, name: "ROASTED BEETROOT TACO", category: "Del Comal",
+            description: "An earthy and complex vegetarian taco. Roasted beetroot is paired with pumpkin purée, smoked almonds, and a tangy pink labneh.",
+            ingredients: ["Beetroot", "pumpkin purée", "smoked almonds", "pink labneh"],
+            history: "This taco showcases a modern, vegetable-forward approach to Mexican cuisine, using traditional ingredients like pumpkin seeds in new and creative ways.",
+            allergens: ["nuts", "milk"], pairingTags: ['taco', 'vegetarian', 'earthy', 'nutty']
+        },
+        {
+            id: 9, name: "PRAWN ADOBADO QUESADILLA", category: "Del Comal",
+            description: "A cheesy quesadilla packed with shrimp marinated in a smoky 'adobo enchilado', with refried beans and a creamy morita chili mayo.",
+            ingredients: ["Shrimp", "adobo enchilado", "mix cheese", "refried beans", "morita chili mayo"],
+            history: "Quesadillas from coastal states often feature fresh seafood. The adobo marinade adds a deep, smoky flavor that pairs perfectly with melted cheese.",
+            allergens: ["crustaceans", "gluten", "milk", "eggs"], pairingTags: ['seafood', 'rich', 'smoky', 'comfort', 'cheesy']
+        },
+        {
+            id: 10, name: "SHORT RIB QUESADILLA", category: "Del Comal",
+            description: "A comforting and rich quesadilla filled with slow-braised short rib and a blend of cheeses. Served with molcajete and pineapple sauces for a balance of smoky and sweet.",
+            ingredients: ["Short rib", "cheese blend", "molcajete sauce", "pineapple sauce"],
+            history: "Combining the indigenous tortilla with Spanish cheese and slow-cooking techniques, this dish transforms a simple snack into a hearty meal.",
+            allergens: ["gluten", "milk"], pairingTags: ['beef', 'rich', 'smoky', 'comfort', 'cheesy']
+        },
+        {
+            id: 20, name: "PORK RIB TACO", category: "Del Comal",
+            description: "Tender, slow-cooked pork rib with a sweet and spicy chili glaze, served in a soft tortilla with creamy avocado purée and fresh herbs.",
+            ingredients: ["Pork rib", "chilli glaze", "avocado purée", "micro basil", "micro mint", "pickled radishes"],
+            history: "This taco elevates the humble rib into a gourmet experience, using classic Mexican glazing techniques to create a sticky, flavorful coating that contrasts with fresh herbs.",
+            allergens: [], pairingTags: ['pork', 'rich', 'sweet', 'taco', 'herbal']
+        },
+        // Platos Fuertes
+        {
+            id: 11, name: "PORK PASTOR", category: "Platos Fuertes",
+            description: "A quintessential Mexico City dish. Pork is marinated in a traditional 'adobo' of chiles and spices, then slow-cooked. Served with grilled pineapple and salsas.",
+            ingredients: ["Pork", "pastor adobo", "grilled pineapple", "onion", "tomatillo salsa"],
+            history: "The 'al pastor' method was brought to Mexico by Lebanese immigrants, who adapted their shawarma spit-grill to local ingredients, creating a new culinary icon.",
+            allergens: [], pairingTags: ['pork', 'spicy', 'sweet', 'robust', 'grilled']
+        },
+        {
+            id: 12, name: "GRILLED STONE BASS", category: "Platos Fuertes",
+            description: "Perfectly grilled stone bass with a delicate, flaky texture. It's served over a sophisticated pistachio pipián and garnished with a fresh herb salad and Mexican dukkah.",
+            ingredients: ["Stone bass", "pistachio pipián", "Mexican dukkah", "mint", "basil", "cilantro"],
+            history: "Pipián is a pre-Hispanic sauce made from ground nuts or seeds. Using pistachios is a modern gourmet twist on this ancient tradition.",
+            allergens: ["fish", "nuts"], pairingTags: ['white_fish', 'nutty', 'herbal', 'elegant', 'grilled']
+        },
+        {
+            id: 13, name: "SHORT RIB", category: "Platos Fuertes",
+            description: "A succulent, slow-cooked short rib with a rich beef glaze. Served with a fresh pineapple salsa and a smoky barbecue sauce.",
+            ingredients: ["Short rib", "beef glaze", "pineapple salsa", "barbecue sauce"],
+            history: "Slow-cooking tough cuts of meat like short rib is a technique perfected in many cuisines. In Mexico, it's often paired with fruity or spicy salsas to cut through the richness.",
+            allergens: ["celery", "sulphites"], pairingTags: ['beef', 'rich', 'braised', 'robust', 'sweet']
+        },
+        {
+            id: 14, name: "LAMB", category: "Platos Fuertes",
+            description: "Tender braised lamb in a deep reduction sauce, accompanied by a spicy 'salsa borracha' (drunken salsa) and a pickled cucumber and onion salsa.",
+            ingredients: ["Braised lamb", "lamb reduction sauce", "salsa borracha", "pickled cucumber"],
+            history: "Lamb barbacoa is a celebratory dish in central Mexico. This refined version uses classic braising techniques and serves it with complex salsas, including one made with beer or pulque.",
+            allergens: ["sulphites", "gluten"], pairingTags: ['lamb', 'rich', 'braised', 'robust', 'spicy']
+        },
+        {
+            id: 15, name: "CAULIFLOWER", category: "Platos Fuertes",
+            description: "A whole roasted cauliflower served as a stunning centerpiece, flavored with salsa macha and morita chili mayo, all sitting in a savory vegetable jus.",
+            ingredients: ["Roasted cauliflower", "salsa macha", "morita chili mayo", "veggie jus"],
+            history: "Whole-roasted vegetables have become a star in modern cuisine. This dish gives cauliflower the main-course treatment with bold, nutty, and spicy Mexican sauces.",
+            allergens: ["nuts", "sesame", "eggs", "mustard"], pairingTags: ['vegetarian', 'main', 'roasted', 'spicy', 'rich']
+        },
+        {
+            id: 21, name: "HALF GRILLED CHICKEN", category: "Platos Fuertes",
+            description: "A juicy, perfectly grilled half chicken marinated in adobo enchilado, finished with a savory chicken glaze and topped with pickled red onions.",
+            ingredients: ["Half chicken", "adobo enchilado", "chicken glaze", "pickled red onion"],
+            history: "Grilled chicken is a staple across Mexico. The use of an adobo marinade infuses the meat with layers of chili and spice before it even hits the grill, ensuring flavor in every bite.",
+            allergens: [], pairingTags: ['chicken', 'grilled', 'spicy', 'robust']
+        },
+        {
+            id: 22, name: "T BONE", category: "Platos Fuertes",
+            description: "A magnificent T-bone steak marinated in cilantro, grilled to perfection, and served with grilled chilies for a classic, hearty experience.",
+            ingredients: ["T-bone", "coriander marinade", "grilled chilies"],
+            history: "While steak is universal, the use of a cilantro-heavy marinade is characteristic of Northern Mexican 'carne asada' culture, where grilling large cuts of beef is a social event.",
+            allergens: [], pairingTags: ['beef', 'grilled', 'robust', 'herbal']
+        },
+        // De La Milpa
+        {
+            id: 23, name: "CRISPY POTATOES", category: "De La Milpa",
+            description: "Perfectly crispy potatoes served with a vibrant green salsa and a smoky morita mayonnaise for dipping.",
+            ingredients: ["Potatoes", "green salsa", "morita mayonnaise"],
+            history: "A beloved side dish, 'papas' are a staple in Mexican cuisine. This version elevates them with two classic salsas, offering both fresh and smoky flavors.",
+            allergens: ["eggs", "mustard"], pairingTags: ['side', 'vegetarian', 'fried', 'spicy']
+        },
+        {
+            id: 24, name: "LEAVES SALAD", category: "De La Milpa",
+            description: "A refreshing and complex salad with bitter radicchio, escarole, sweet pear, and smoked almonds, all tossed in a bright preserved lemon vinaigrette.",
+            ingredients: ["Radicchio", "escarole lettuce", "smoked almonds", "pear", "preserved lemon vinaigrette"],
+            history: "This salad is a modern interpretation of a side dish, balancing bitter, sweet, smoky, and acidic elements in a way that perfectly complements richer main courses.",
+            allergens: ["nuts"], pairingTags: ['side', 'vegetarian', 'fresh', 'light']
+        },
+        {
+            id: 25, name: "QUESO FUNDIDO", category: "De La Milpa",
+            description: "A decadent bowl of molten Comté and mozzarella cheese, topped with savory roasted chorizo and fresh chives. Perfect for sharing.",
+            ingredients: ["Comté cheese", "mozzarella cheese", "roasted chorizo", "fresh chives"],
+            history: "'Melted cheese' is a classic Northern Mexican appetizer, traditionally cooked in a cast-iron skillet and served with tortillas. Our version uses a blend of European cheeses for extra depth.",
+            allergens: ["milk"], pairingTags: ['side', 'rich', 'cheesy', 'comfort']
+        },
+        // Desserts
+        {
+            id: 16, name: "TRES LECHES CAKE", category: "Desserts",
+            description: "A light sponge cake soaked in a decadent mixture of three milks. Topped with cinnamon custard cream, fresh strawberries, and a crispy corn meringue.",
+            ingredients: ["Sponge cake", "evaporated milk", "condensed milk", "cream", "cinnamon custard", "strawberry"],
+            history: "A beloved cake for celebrations across Latin America, likely popularized by dairy companies on their canned milk labels in the 20th century.",
+            allergens: ["gluten", "eggs", "milk"], pairingTags: ['dessert', 'creamy', 'sweet', 'classic']
+        },
+        {
+            id: 17, name: "MANGO CHAMOY", category: "Desserts",
+            description: "A refreshing and exciting dessert featuring fresh mango with chamoy (a salty, sweet, sour, and spicy condiment) and a sharp lime sorbet.",
+            ingredients: ["Fresh mango", "chamoy", "lime sorbet", "Tajín chili powder"],
+            history: "This dish captures the essence of Mexican street food snacks, where fresh fruit is commonly dressed with lime, salt, chili, and chamoy for a multi-layered flavor explosion.",
+            allergens: [], pairingTags: ['dessert', 'fruity', 'spicy', 'light', 'sour']
+        }
+    ];
+
+    // Expanded Wine Menu with Pairing Profiles
+    const wineMenu = [
+        { 
+            id: 101, name: "Albarino Sobre Lias, Casal Caeiro", type: "White", price: 67, 
+            sommelierNotes: { appearance: "Clear, pale lemon-green.", nose: "Aromas of grapefruit, lime, white peach, and a distinct saline, mineral note.", palate: "Dry, high acidity, light body. Flavors of green apple and citrus zest, with a creamy texture from lees aging.", summary: "A classic, vibrant Albariño, exceptionally food-friendly." }
+        },
+        { 
+            id: 102, name: "Sauvignon Blanc, Dog Point", type: "White", price: 70, 
+            sommelierNotes: { appearance: "Clear, pale lemon.", nose: "Aromas of passionfruit, gooseberry, and a hint of fresh-cut grass.", palate: "Dry, high acidity, medium body. Intense flavors of tropical fruit and citrus, with a crisp finish.", summary: "An exemplary Marlborough Sauvignon Blanc." }
+        },
+        {
+            id: 103, name: "Gewurztraminer, Cave de Cléebourg", type: "White", price: 61,
+            sommelierNotes: { appearance: "Clear, pale gold.", nose: "Intensely aromatic with notes of lychee, rose petals, and a hint of ginger.", palate: "Off-dry, with a rich, slightly oily texture, medium acidity, and a long, perfumed finish.", summary: "An aromatic powerhouse, perfect for spicy and sweet flavor profiles."}
+        },
+        {
+            id: 104, name: "Vermentino, Quatre Vin Organic Blanc", type: "White", price: 66,
+            sommelierNotes: { appearance: "Pale straw with green hints.", nose: "Delicate aromas of white flowers, green pear, and a touch of bitter almond.", palate: "Dry, refreshing acidity, light to medium body. Crisp with a clean, slightly saline finish.", summary: "A quintessential Provence white, perfect for light starters."}
+        },
+        {
+            id: 105, name: "Grüner Veltliner Federspiel, Rudi Pichler", type: "White", price: 78.7,
+            sommelierNotes: { appearance: "Bright, pale yellow.", nose: "Signature notes of white pepper, radish, and green apple.", palate: "Dry, zesty acidity, medium body. Structured and mineral-driven with a spicy finish.", summary: "A classic Grüner that can handle spice and fried foods."}
+        },
+        {
+            id: 107, name: "Sancerre La Croix du Roy, Crochet", type: "White", price: 98,
+            sommelierNotes: { appearance: "Pale lemon.", nose: "Aromas of peach, pear, citrus, and a distinct flinty, smoky minerality.", palate: "Dry, high acidity, medium body. Elegant and restrained with a long, mineral finish.", summary: "A sophisticated and mineral-driven Sauvignon Blanc from its spiritual home."}
+        },
+        { 
+            id: 108, name: "Riesling Cole Ranch, Cobb", type: "White", price: 138,
+            sommelierNotes: { appearance: "Pale lemon.", nose: "Developing notes of lime peel, white peach, and a characteristic wet stone or petrol aroma.", palate: "Dry, high acidity, light body. Laser-like focus with intense citrus and mineral flavors.", summary: "A complex, age-worthy Riesling with incredible precision."}
+        },
+        { 
+            id: 106, name: "Châteauneuf-du-Pape Blanc, Dom de Beaurenard", type: "White", price: 178,
+            sommelierNotes: { appearance: "Medium gold.", nose: "Complex aromas of apricot, pear, fennel, and honeysuckle.", palate: "Dry, full-bodied, with a rich, textured mouthfeel and balanced acidity. Long, complex finish.", summary: "A rare and powerful white, offering incredible complexity for rich fish or pork." }
+        },
+        { 
+            id: 201, name: "Tempranillo, Rioja Crianza Conde Valdemar", type: "Red", price: 51, 
+            sommelierNotes: { appearance: "Clear, medium ruby.", nose: "Aromas of red cherry, raspberry, vanilla, clove, and a touch of leather.", palate: "Dry, medium acidity, smooth tannins. Flavors of ripe red fruit and sweet spice.", summary: "A benchmark Rioja Crianza that beautifully balances fruit and oak." }
+        },
+        { 
+            id: 209, name: "Barbera d'Alba DOC, Fratelli Antonio e Raimondo", type: "Red", price: 56,
+            sommelierNotes: { appearance: "Deep ruby.", nose: "Aromas of sour cherry, plum, and a hint of clove.", palate: "Dry, high acidity, low tannins. Juicy and fresh with a vibrant fruit character.", summary: "A food-friendly Italian red with bright acidity."}
+        },
+        { 
+            id: 202, name: "Pinot Noir IX, Pulenta Estate", type: "Red", price: 71.4, 
+            sommelierNotes: { appearance: "Clear, pale ruby.", nose: "Aromas of fresh red cherry, strawberry, and floral notes of violet.", palate: "Dry, high acidity, silky tannins. Pure red fruit flavors and a fresh, elegant finish.", summary: "A vibrant, high-altitude Pinot Noir." }
+        },
+        {
+            id: 204, name: "Malbec Rose, Finca La Colonia", type: "Rosé", price: 51.5,
+            sommelierNotes: { appearance: "Bright pink.", nose: "Fresh aromas of strawberries and red cherries.", palate: "Dry, crisp acidity, light body. Refreshing with a clean finish.", summary: "A versatile and refreshing rosé."}
+        },
+        {
+            id: 205, name: "Mucchietto Primitivo IGT Puglia 2022", type: "Red", price: 61,
+            sommelierNotes: { appearance: "Deep ruby red.", nose: "Intense aromas of ripe dark berries, plum jam, and sweet spices.", palate: "Dry, full-bodied with soft tannins. Rich and warming with a hint of dark chocolate.", summary: "A bold, fruit-forward red for hearty dishes."}
+        },
+        {
+            id: 208, name: "Cabernet Franc Galantas Gran Reserva, Haras de Pirque", type: "Red", price: 90,
+            sommelierNotes: { appearance: "Deep ruby.", nose: "Aromas of blueberry, blackberry, with a distinct herbal, bell pepper note and a touch of mineral.", palate: "Dry, medium-full body, with structured tannins and a savory, herbal finish.", summary: "An elegant and structured red with a unique savory character."}
+        },
+        { 
+            id: 206, name: "Volnay 1er Cru Le Ronceret, Dom Georges Glantenay", type: "Red", price: 252,
+            sommelierNotes: { appearance: "Pale to medium ruby.", nose: "Elegant aromas of blackberry, violets, and a flinty, mineral character.", palate: "Dry, high acidity, fine-grained tannins. A silky texture with a long, complex finish.", summary: "The epitome of elegant Burgundy, for refined meat dishes." }
+        },
+        { 
+            id: 207, name: "Château Talbot, Saint-Julien", type: "Red", price: 310,
+            sommelierNotes: { appearance: "Deep garnet.", nose: "Classic Bordeaux nose of blackcurrant, tobacco leaf, cedar, and espresso.", palate: "Dry, full-bodied with firm, structured tannins. Powerful and long, with layers of savory and dark fruit notes.", summary: "A classic, powerful Bordeaux for the most robust dishes." }
+        },
+        { 
+            id: 301, name: "Sauvignon Blanc Late Harvest, Morandė", type: "Sweet", price: 32.5, 
+            sommelierNotes: { appearance: "Clear, deep gold.", nose: "Aromas of honey, candied pineapple, apricot jam, and orange blossom.", palate: "Lusciously sweet, with high acidity that provides perfect balance.", summary: "A beautiful sweet wine where acidity perfectly balances richness." }
+        },
+    ];
+
+    // Cocktail Menu
+    const cocktailMenu = [
+        { id: 401, name: "Tommy's Margarita", price: 16.8, ingredients: ["818 Blanco Tequila", "Lime Juice", "Organic Agave"], history: "Created in the 1990s by Julio Bermejo at Tommy's Mexican Restaurant in San Francisco, it swaps orange liqueur for agave nectar for a purer flavor.", tastingNotes: "Sour, fresh, and citric. A clean and direct expression of tequila." },
+        { id: 402, name: "Mezcalita", price: 17.5, ingredients: ["Casamigos Mezcal", "Lime Juice", "Natural Agave"], history: "A simple twist on the Margarita, substituting tequila's smoky cousin, mezcal, for a deeper, earthier flavor experience.", tastingNotes: "Smoky, rich, and citric. A powerful and complex cocktail." },
+        { id: 403, name: "Paloma", price: 15.7, ingredients: ["818 Blanco Tequila", "Cointreau", "Three Cents Grapefruit Soda"], history: "Arguably Mexico's most popular cocktail. A simple, refreshing, and perfectly balanced staple in bars across the country.", tastingNotes: "Clean, zesty, and fresh. The ultimate thirst-quencher." },
+        { id: 404, name: "Ixchel Negroni", price: 17.8, ingredients: ["818 Reposado Tequila", "Melon and honey infused Campari", "Martini Rubino"], history: "A modern, house twist on the Italian classic, using aged reposado tequila instead of gin for an earthy depth.", tastingNotes: "Bitter, fruity, and sour. A complex and intriguing variation." },
+        { id: 405, name: "Horchata", price: 16.8, ingredients: ["Vivir Cafe", "Rice Milk", "Cinnamon"], history: "Inspired by the traditional Mexican rice milk drink, this alcoholic version turns the beloved 'agua fresca' into a creamy after-dinner cocktail.", tastingNotes: "Sweet, creamy, and nutty. A delicious liquid dessert." },
+        { id: 406, name: "Spicy white peach", price: 16.8, ingredients: ["818 blanco", "white peach puree", "red jalapeño sauce", "lime juice", "natural agave"], history: "A modern margarita variation that balances sweet, spicy, and creamy elements for a complex and seductive cocktail experience.", tastingNotes: "Spicy, creamy, and smooth with a fruity backbone." },
+        { id: 407, name: "Blood Orange Sour", price: 16.8, ingredients: ["Lost explorer espadin", "mayan orange liqueur", "lime juice", "egg white", "blood orange puree", "organic agave syrup"], history: "A vibrant sour that uses smoky mezcal as its base, with the deep citrus flavor of blood orange creating a visually stunning and delicious drink.", tastingNotes: "Fresh, zesty, and sour with a smoky undertone." },
+        { id: 408, name: "Avocado Margarita", price: 17.5, ingredients: ["Casamigos blanco", "lime juice", "avocado", "mexican corn liquor", "organic agave"], history: "A creative twist that incorporates avocado for an incredibly smooth, creamy texture, transforming the classic margarita into a richer experience.", tastingNotes: "Sweet, rich, and smooth with a unique creamy body." },
+        { id: 409, name: "Tequila Sour", price: 15.7, ingredients: ["818 blanco", "disaronno amaretto", "lime juice", "house chilli syrup"], history: "A Mexican take on the classic sour, this version adds the nutty sweetness of amaretto and a house-made chili syrup for a smoky, spicy kick.", tastingNotes: "Smoky, creamy, and earthy with a sweet and spicy finish." }
+    ];
+    
+    // --- APPLICATION LOGIC ---
+
+    const foodMenuContainer = document.getElementById('food-menu-container');
+    const pairingModal = document.getElementById('pairing-modal');
+    const modalContent = document.getElementById('modal-content');
+
+    // Function to render the food menu
+    function renderFoodMenu() {
+        foodMenuContainer.innerHTML = '';
+        const categories = [...new Set(foodMenu.map(item => item.category))];
+        
+        categories.forEach(category => {
+            const categorySection = document.createElement('section');
+            categorySection.className = 'mb-12';
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.className = 'text-3xl font-bold border-b-2 border-stone-300 pb-2 mb-6';
+            categoryTitle.textContent = category;
+            categorySection.appendChild(categoryTitle);
+            const itemsGrid = document.createElement('div');
+            itemsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-8';
+            
+            foodMenu.filter(item => item.category === category).forEach(item => {
+                const allergensHtml = item.allergens.map(allergenKey => {
+                    const allergen = ALLERGENS_UK[allergenKey];
+                    return `<div class="allergen-icon" title="${allergen.name}">
+                                ${allergen.icon}
+                                <span class="allergen-tooltip">${allergen.name}</span>
+                            </div>`;
+                }).join('');
+
+                const itemCard = document.createElement('div');
+                itemCard.className = 'bg-white p-6 rounded-lg shadow-lg flex flex-col';
+                itemCard.innerHTML = `
+                    <h3 class="text-2xl font-serif font-bold mb-2">${item.name}</h3>
+                    <p class="text-stone-600 mb-4 flex-grow">${item.description}</p>
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-sm mb-1">Allergens:</h4>
+                        <div class="flex flex-wrap">${allergensHtml || '<span class="text-stone-500 text-sm">None</span>'}</div>
+                    </div>
+                    <button onclick="showPairingModal(${item.id})" class="mt-auto w-full bg-stone-800 text-white py-2 px-4 rounded-md hover:bg-stone-700 transition-colors">
+                        View Details & Pairings
+                    </button>
+                `;
+                itemsGrid.appendChild(itemCard);
+            });
+            categorySection.appendChild(itemsGrid);
+            foodMenuContainer.appendChild(categorySection);
+        });
+    }
+
+    // ** REVISED Pairing Logic **
+    const pairingMap = {
+        1: { wines: { byGlass: 104, midRange: 102, premium: 108 }, cocktails: [408, 403] }, // Guacamole
+        2: { wines: { byGlass: 101, midRange: 105, premium: 106 }, cocktails: [409, 403] }, // Focaccia
+        3: { wines: { byGlass: 101, midRange: 105, premium: 106 }, cocktails: [406, 403] }, // Rock Shrimp
+        4: { wines: { byGlass: 104, midRange: 107, premium: 108 }, cocktails: [401, 407] }, // Tuna Tostada
+        5: { wines: { byGlass: 204, midRange: 202, premium: 206 }, cocktails: [402, 409] }, // Fillet Tataki
+        6: { wines: { byGlass: 101, midRange: 102, premium: 107 }, cocktails: [401, 403] }, // Stone Bass Tiradito
+        7: { wines: { byGlass: 101, midRange: 105, premium: 106 }, cocktails: [403, 401] }, // Ensenada Taco
+        8: { wines: { byGlass: 204, midRange: 102, premium: 208 }, cocktails: [403, 402] }, // Beetroot Taco
+        9: { wines: { byGlass: 101, midRange: 105, premium: 106 }, cocktails: [406, 407] }, // Prawn Quesadilla
+        10: { wines: { byGlass: 209, midRange: 201, premium: 208 }, cocktails: [402, 404] }, // Short Rib Quesadilla
+        11: { wines: { byGlass: 103, midRange: 202, premium: 206 }, cocktails: [402, 407] }, // Pork Pastor
+        12: { wines: { byGlass: 104, midRange: 107, premium: 106 }, cocktails: [401, 403] }, // Grilled Stone Bass
+        13: { wines: { byGlass: 201, midRange: 205, premium: 207 }, cocktails: [402, 404] }, // Short Rib
+        14: { wines: { byGlass: 201, midRange: 208, premium: 207 }, cocktails: [402, 409] }, // Lamb
+        15: { wines: { byGlass: 103, midRange: 105, premium: 106 }, cocktails: [406, 402] }, // Cauliflower
+        16: { wines: { byGlass: 301, midRange: null, premium: null }, cocktails: [405] }, // Tres Leches
+        17: { wines: { byGlass: 301, midRange: null, premium: null }, cocktails: [401] },  // Mango Chamoy
+        20: { wines: { byGlass: 209, midRange: 205, premium: 208 }, cocktails: [402, 404] }, // Pork Rib Taco
+        21: { wines: { byGlass: 104, midRange: 202, premium: 106 }, cocktails: [403, 409] }, // Half Chicken
+        22: { wines: { byGlass: 201, midRange: 205, premium: 207 }, cocktails: [402, 404] }, // T-Bone
+        23: { wines: { byGlass: 101, midRange: 105, premium: null }, cocktails: [403, 401] }, // Crispy Potatoes
+        24: { wines: { byGlass: 104, midRange: 102, premium: 107 }, cocktails: [403, 401] }, // Leaves Salad
+        25: { wines: { byGlass: 209, midRange: 201, premium: 205 }, cocktails: [402, 404] }, // Queso Fundido
+        26: { wines: { byGlass: 104, midRange: 107, premium: 108 }, cocktails: [403, 401] } // Isle of Wight Tomatoes
+    };
+
+    function findPairings(dishId) {
+        const pairings = pairingMap[dishId] || { wines: { byGlass: null, midRange: null, premium: null }, cocktails: [] };
+        return {
+            wines: {
+                byGlass: wineMenu.find(w => w.id === pairings.wines.byGlass),
+                midRange: wineMenu.find(w => w.id === pairings.wines.midRange),
+                premium: wineMenu.find(w => w.id === pairings.wines.premium)
+            },
+            cocktails: pairings.cocktails.map(id => cocktailMenu.find(c => c.id === id))
+        };
+    }
+    
+    // ** REVISED getPairingReason function **
+    function getPairingReason(drink, dish) {
+        const reasons = {
+            'd1-dr104': "The Vermentino's crisp acidity and notes of green pear provide a clean, refreshing counterpoint to the rich creaminess of the avocado.",
+            'd1-dr102': "The Sauvignon Blanc's zesty passionfruit and herbal notes amplify the fresh cilantro and lime in the guacamole, creating a vibrant synergy.",
+            'd1-dr108': "The Riesling's high acidity cuts through the richness of the avocado, while its complex notes of wet stone and lime peel complement the dish's zesty profile.",
+            'd1-dr408': "This cocktail's creamy avocado base creates a luxurious texture-on-texture pairing, while the lime and corn liqueur lift the finish.",
+            'd1-dr403': "The Paloma's grapefruit soda provides a zesty, slightly bitter counterpoint to the rich avocado, cleansing the palate with every sip.",
+            'd2-dr101': "The Albariño's high acidity cuts through the richness of the seaweed butter and guajillo oil, while its saline notes complement the umami flavors.",
+            'd2-dr409': "The Tequila Sour's chili syrup echoes the guajillo oil's spice, while the amaretto's sweetness provides a pleasant contrast to the savory bread.",
+            'd3-dr101': "The Albariño's high acidity and saline character cut cleanly through the richness of the tempura batter, while its citrus notes lift the sweet shrimp.",
+            'd3-dr105': "The Grüner Veltliner's characteristic white pepper note is a fantastic match for the adobo spice, and its zesty acidity handles the fried element with ease.",
+            'd3-dr406': "The cocktail's creamy peach sweetness envelops the shrimp, while the jalapeño heat provides a thrilling contrast that matches the adobo's spice.",
+            'd4-dr107': "The Sancerre's elegant, flinty minerality provides a sophisticated backdrop for the raw tuna, while its restrained citrus notes complement without overpowering.",
+            'd4-dr401': "The pure agave and lime in the Tommy's Margarita act almost like a ceviche marinade for the tuna, enhancing its freshness without overpowering it.",
+            'd4-dr407': "The smoky mezcal in the sour provides a beautiful contrast to the fresh tuna, while the blood orange acidity complements the green pipián.",
+            'd5-dr204': "The Rosé's bright acidity cuts through the richness of the seared fillet, while its red berry notes offer a beautiful contrast to the smoky chilmole marinade.",
+            'd5-dr202': "The Pinot Noir's earthy undertones and bright red fruit are a superb match for the smoky chilmole marinade and the seared beef.",
+            'd5-dr206': "A truly elegant pairing. The Volnay's silky tannins, floral notes, and flinty minerality elevate the delicate beef without overpowering it.",
+            'd5-dr409': "The Tequila Sour's smoky chili syrup resonates with the chilmole marinade, while the amaretto's nutty sweetness provides a surprising and delicious counterpoint.",
+            'd6-dr101': "The Albariño's vibrant grapefruit and lime notes perfectly mirror the citrus in the aguachile, creating a seamless and refreshing pairing.",
+            'd6-dr102': "The Sauvignon Blanc's tropical fruit notes enhance the mango in the dish, while its high acidity matches the intensity of the aguachile.",
+            'd7-dr101': "The Albariño's high acidity and saline character cut through the beer batter and creamy mayonnaise, while its citrus notes lift the fresh fish.",
+            'd7-dr105': "Grüner's peppery spice is a great match for the scotch bonnet mayo, while its acidity cleanses the palate from the fried fish.",
+            'd7-dr403': "A Paloma is a quintessential taco companion. Its effervescence and grapefruit zest are incredibly refreshing against the fried fish and spicy mayo.",
+            'd7-dr401': "The classic choice. The sharp lime cuts through the richness, while the tequila complements the flavors of the corn tortilla.",
+            'd8-dr208': "The Cabernet Franc's subtle pyrazine (bell pepper) and herbal notes are a fantastic complement to the earthy beetroot, creating a savory, garden-fresh pairing.",
+            'd9-dr406': "The Spicy White Peach Margarita's heat and fruitiness are a bold match for the prawn adobo, with its creamy texture complementing the melted cheese.",
+            'd10-dr209': "The Barbera's high acidity cuts through the richness of the cheese and short rib, while its sour cherry notes provide a lovely contrast to the smoky molcajete sauce.",
+            'd11-dr103': "An unconventional but brilliant pairing. The Gewurztraminer's notes of lychee and rose petal offer a stunning aromatic contrast to the savory adobo spice, while its off-dry character embraces the sweet pineapple.",
+            'd12-dr107': "The Sancerre's flinty minerality and restrained citrus notes provide an elegant framework that enhances the delicate flavor of the grilled bass without overwhelming the nutty pipián.",
+            'd13-dr201': "The Rioja's savory leather and spice notes from oak aging are a classic match for the braised short rib, complementing the smoky barbecue sauce.",
+            'd13-dr205': "The Primitivo's bold, jammy dark fruit and spice notes are a powerful match for the rich, glazed short rib, standing up to its intense flavor profile.",
+            'd13-dr207': "An ultimate pairing for a rich dish. The Château Talbot's structured tannins and notes of blackcurrant and tobacco can stand shoulder-to-shoulder with the powerful short rib.",
+            'd13-dr404': "The bitterness of our Ixchel Negroni cuts through the fat of the rib, while the aged tequila provides an earthy foundation that complements the smoky barbecue sauce.",
+            'd14-dr208': "The Cabernet Franc's herbal and savory notes are a perfect match for the rich lamb, while its structured tannins stand up to the reduction sauce.",
+            'd15-dr103': "The Gewurztraminer's aromatic profile of rose and ginger is a bold and successful pairing for the spicy salsa macha, while its texture matches the richness of the dish.",
+            'd16-dr301': "This Late Harvest wine has notes of honey and candied pineapple that harmonize with the cake's sweetness, while its high acidity prevents the pairing from being overly cloying.",
+            'd16-dr405': "A perfect match. The creamy, cinnamon notes of the Horchata cocktail mirror the flavors in the cake's custard, creating a seamless and decadent dessert experience.",
+            'd17-dr301': "The wine's tropical fruit notes of pineapple and apricot jam enhance the fresh mango, while its sweetness is balanced by the tangy chamoy and lime sorbet.",
+            'd17-dr401': "The Tommy's Margarita's sharp lime and clean agave flavor profile provides a fantastic citrusy counterpoint to the sweet mango and spicy Tajín.",
+            'd20-dr209': "The Barbera's high acidity is perfect for cutting through the richness of the pork rib, while its sour cherry notes contrast the sweet chili glaze.",
+            'd21-dr106': "A powerful white for a powerful bird. The Châteauneuf-du-Pape Blanc's rich texture and notes of stone fruit and fennel complement the adobo-marinated chicken beautifully.",
+            'd22-dr207': "A classic pairing. The bold structure, firm tannins, and blackcurrant notes of the Château Talbot are the perfect match for a high-quality T-bone steak.",
+            'd26-dr104': "The Vermentino's crisp, saline character is a perfect match for the fresh tomatoes, while its acidity balances the creamy ricotta.",
+            'd26-dr107': "The Sancerre's minerality and high acidity cut through the richness of the olive oil and cheese, elevating the fresh tomato flavor.",
+            'd26-dr401': "The clean, sharp lime of the Tommy's Margarita acts like a final squeeze of citrus over the salad, brightening all the flavors."
+        };
+        return reasons[`d${dish.id}-dr${drink.id}`];
+    }
+
+    // Function to show the pairing modal
+    window.showPairingModal = function(dishId) {
+        const dish = foodMenu.find(d => d.id === dishId);
+        if (!dish) return;
+        const pairings = findPairings(dishId);
+
+        let pairingsHtml = `
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">${dish.name}</h2>
+                    <button onclick="closeModal()" class="text-3xl text-stone-500 hover:text-stone-800">&times;</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 border-b pb-1">Dish Description</h3>
+                        <p class="text-stone-600 mb-4">${dish.description}</p>
+                        <h3 class="text-xl font-bold mb-2 border-b pb-1">Main Ingredients</h3>
+                        <p class="text-stone-600 mb-4">${dish.ingredients.join(', ')}.</p>
+                        <h3 class="text-xl font-bold mb-2 border-b pb-1">History & Origin</h3>
+                        <p class="text-stone-600 mb-4">${dish.history}</p>
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-lg">
+                        <h3 class="text-2xl font-serif font-bold mb-4 text-center">Pairing Suggestions</h3>
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold mb-2">Recommended Wines</h4>
+                            ${generateWinePairingHtml(pairings.wines, dish)}
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-2">Suggested Cocktails</h4>
+                            ${generateCocktailPairingHtml(pairings.cocktails, dish)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        modalContent.innerHTML = pairingsHtml;
+        document.body.style.overflow = 'hidden';
+        pairingModal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-95');
+    }
+
+    function generateWinePairingHtml(wines, dish) {
+        let html = '<ul class="space-y-3">';
+        const priceCategories = ['byGlass', 'midRange', 'premium'];
+        const categoryLabels = { byGlass: 'Bottle', midRange: 'Bottle', premium: 'Premium Bottle' };
+
+        priceCategories.forEach(category => {
+            const wine = wines[category];
+            if (wine) {
+                const reason = getPairingReason(wine, dish);
+                html += `<li><a href="#" onclick="showDrinkDetails(${wine.id}, 'wine')" class="block p-3 bg-white rounded shadow hover:shadow-md transition-shadow"><strong>${categoryLabels[category]} (£${wine.price}):</strong> ${wine.name}<br><small class="text-stone-500">${reason}</small></a></li>`;
+            } else if (dish.pairingTags.includes('dessert')) {
+                // Do not show message for dessert mid/premium
+            } else {
+                 html += `<li><p class="text-stone-500 p-3 text-sm">No specific recommendation in this price range. Please ask your server for guidance.</p></li>`;
+            }
+        });
+
+        html += '</ul>';
+        return html;
+    }
+
+    function generateCocktailPairingHtml(cocktails, dish) {
+        if (!cocktails || cocktails.length === 0) return '<p class="text-stone-500">No cocktail suggestions for this dish.</p>';
+        let html = '<ul class="space-y-3">';
+        cocktails.forEach(cocktail => {
+            if (cocktail) {
+                const reason = getPairingReason(cocktail, dish);
+                html += `<li><a href="#" onclick="showDrinkDetails(${cocktail.id}, 'cocktail')" class="block p-3 bg-white rounded shadow hover:shadow-md transition-shadow"><strong>${cocktail.name} (£${cocktail.price})</strong><br><small class="text-stone-500">${reason}</small></a></li>`;
+            }
+        });
+        html += '</ul>';
+        return html;
+    }
+
+    // Function to show drink details
+    window.showDrinkDetails = function(drinkId, type) {
+        const drink = type === 'wine' ? wineMenu.find(w => w.id === drinkId) : cocktailMenu.find(c => c.id === drinkId);
+        if (!drink) return;
+
+        let detailsHtml = '';
+        if (type === 'wine') {
+            const notes = drink.sommelierNotes;
+            detailsHtml = `
+                <div class="p-6 md:p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-3xl font-serif font-bold">${drink.name}</h2>
+                            <p class="text-stone-500">${drink.grape || 'Blend'} - ${drink.region}</p>
+                        </div>
+                        <button onclick="closeModal()" class="text-3xl text-stone-500 hover:text-stone-800">&times;</button>
+                    </div>
+                    <div class="space-y-4 text-stone-700">
+                        <div><h4 class="font-bold text-lg text-stone-800">Appearance</h4><p>${notes.appearance}</p></div>
+                        <div><h4 class="font-bold text-lg text-stone-800">Nose</h4><p>${notes.nose}</p></div>
+                        <div><h4 class="font-bold text-lg text-stone-800">Palate</h4><p>${notes.palate}</p></div>
+                        <div class="bg-stone-100 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-stone-800">Sommelier's Summary</h4>
+                            <p class="mt-1">${notes.summary}</p>
+                        </div>
+                    </div>
+                    <button onclick="goBackToPairings()" class="mt-8 text-stone-800 font-semibold">← Back to Pairings</button>
+                </div>
+            `;
+        } else { // Cocktail
+            detailsHtml = `
+                <div class="p-6 md:p-8">
+                    <div class="flex justify-between items-start">
+                        <h2 class="text-3xl font-serif font-bold">${drink.name} (£${drink.price})</h2>
+                        <button onclick="closeModal()" class="text-3xl text-stone-500 hover:text-stone-800">&times;</button>
+                    </div>
+                    <div class="mt-6 space-y-4">
+                        <div><h4 class="font-bold">Tasting Notes:</h4><p class="text-stone-600">${drink.tastingNotes || 'Not available'}</p></div>
+                        <div><h4 class="font-bold">Ingredients:</h4><p class="text-stone-600">${drink.ingredients.join(', ')}</p></div>
+                        <div><h4 class="font-bold">History:</h4><p class="text-stone-600">${drink.history || 'Not available'}</p></div>
+                    </div>
+                    <button onclick="goBackToPairings()" class="mt-6 text-stone-800 font-semibold">← Back to Pairings</button>
+                </div>
+            `;
+        }
+        
+        window.previousModalState = modalContent.innerHTML;
+        modalContent.innerHTML = detailsHtml;
+        modalContent.scrollTop = 0;
+    }
+    
+    window.goBackToPairings = function() {
+        if (window.previousModalState) {
+            modalContent.innerHTML = window.previousModalState;
+        }
+    }
+
+    window.closeModal = function() {
+        document.body.style.overflow = 'auto';
+        pairingModal.classList.add('opacity-0', 'pointer-events-none');
+        modalContent.classList.add('scale-95');
+        window.previousModalState = null;
+    }
+
+    pairingModal.addEventListener('click', function(event) {
+        if (event.target === pairingModal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', renderFoodMenu);
+
+    </script>
 </body>
 </html>
